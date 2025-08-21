@@ -1,1 +1,0 @@
-# Kindi-proto

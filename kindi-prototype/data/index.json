@@ -1,0 +1,24 @@
+{
+  "datasets": [
+    {
+      "id": "operation-blackwater",
+      "name": "Operation Blackwater",
+      "description": "Intelligence analysis dataset for Operation Blackwater investigation",
+      "entitiesCount": 7,
+      "relationshipsCount": 7,
+      "eventsCount": 5,
+      "locationsCount": 5,
+      "lastUpdated": "2023-10-15T14:30:00Z"
+    },
+    {
+      "id": "cyber-threat-network",
+      "name": "Cyber Threat Network",
+      "description": "Analysis of connected cyber threats and attack patterns",
+      "entitiesCount": 7,
+      "relationshipsCount": 7,
+      "eventsCount": 5,
+      "locationsCount": 4,
+      "lastUpdated": "2023-03-15T16:45:00Z"
+    }
+  ]
+}

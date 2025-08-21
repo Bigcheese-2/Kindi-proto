@@ -1,0 +1,58 @@
+.resize-handle {
+  position: absolute;
+  z-index: 10;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+
+.resize-handle:hover,
+.resize-handle.active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.resize-handle.horizontal {
+  cursor: col-resize;
+  width: 8px;
+  height: 100%;
+}
+
+.resize-handle.vertical {
+  cursor: row-resize;
+  height: 8px;
+  width: 100%;
+}
+
+.resizable-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add visual indicator for resize handles */
+.resize-handle.horizontal:after,
+.resize-handle.vertical:after {
+  content: '';
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s;
+}
+
+.resize-handle.horizontal:after {
+  width: 2px;
+  height: 20px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.resize-handle.vertical:after {
+  height: 2px;
+  width: 20px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.resize-handle:hover:after,
+.resize-handle.active:after {
+  background-color: rgba(0, 0, 0, 0.4);
+}

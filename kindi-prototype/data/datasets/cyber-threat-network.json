@@ -1,0 +1,327 @@
+{
+  "id": "cyber-threat-network",
+  "name": "Cyber Threat Network",
+  "description": "Analysis of connected cyber threats and attack patterns",
+  "entities": [
+    {
+      "id": "e001",
+      "type": "organization",
+      "name": "APT-29",
+      "attributes": {
+        "type": "Threat Actor",
+        "origin": "Russia",
+        "active_since": "2008",
+        "capabilities": ["Spear Phishing", "Zero-day Exploits", "Custom Malware"],
+        "notes": "Sophisticated state-sponsored threat actor"
+      },
+      "risk": 0.9
+    },
+    {
+      "id": "e002",
+      "type": "digital",
+      "name": "Darkhotel Malware",
+      "attributes": {
+        "type": "Malware",
+        "category": "Trojan",
+        "first_observed": "2020-05-15",
+        "capabilities": ["Data Exfiltration", "Keylogging", "Backdoor"],
+        "notes": "Advanced malware targeting executives in luxury hotels"
+      },
+      "risk": 0.85
+    },
+    {
+      "id": "e003",
+      "type": "digital",
+      "name": "CVE-2023-1337",
+      "attributes": {
+        "type": "Vulnerability",
+        "affected_systems": ["Windows 11", "Windows Server 2022"],
+        "severity": "Critical",
+        "patch_available": true,
+        "notes": "Zero-day vulnerability in Windows kernel"
+      },
+      "risk": 0.95
+    },
+    {
+      "id": "e004",
+      "type": "organization",
+      "name": "Global Financial Corp",
+      "attributes": {
+        "type": "Target Organization",
+        "industry": "Finance",
+        "size": "Enterprise",
+        "security_posture": "Advanced",
+        "notes": "Major financial institution targeted in recent campaigns"
+      },
+      "risk": 0.7
+    },
+    {
+      "id": "e005",
+      "type": "person",
+      "name": "John Smith",
+      "attributes": {
+        "role": "CISO",
+        "organization": "Global Financial Corp",
+        "targeted": true,
+        "notes": "Targeted in spear phishing campaign"
+      },
+      "risk": 0.6
+    },
+    {
+      "id": "e006",
+      "type": "digital",
+      "name": "C2 Server",
+      "attributes": {
+        "type": "Infrastructure",
+        "ip_address": "198.51.100.123",
+        "hosting_provider": "Anonymous Hosting Ltd",
+        "first_observed": "2023-01-10",
+        "notes": "Command and control server for multiple campaigns"
+      },
+      "risk": 0.8
+    },
+    {
+      "id": "e007",
+      "type": "organization",
+      "name": "Lazarus Group",
+      "attributes": {
+        "type": "Threat Actor",
+        "origin": "North Korea",
+        "active_since": "2009",
+        "capabilities": ["Financial Theft", "Destructive Attacks", "Ransomware"],
+        "notes": "State-sponsored group focused on financial gain and espionage"
+      },
+      "risk": 0.85
+    }
+  ],
+  "relationships": [
+    {
+      "id": "r001",
+      "type": "owns",
+      "source": "e001",
+      "target": "e002",
+      "directed": true,
+      "strength": 0.9,
+      "attributes": {
+        "evidence": "Strong",
+        "first_association": "2020-06-01",
+        "notes": "APT-29 developed and deployed this malware"
+      }
+    },
+    {
+      "id": "r002",
+      "type": "uses",
+      "source": "e001",
+      "target": "e003",
+      "directed": true,
+      "strength": 0.85,
+      "attributes": {
+        "first_observed": "2023-02-15",
+        "campaigns": 3,
+        "notes": "Vulnerability exploited in targeted attacks"
+      }
+    },
+    {
+      "id": "r003",
+      "type": "targets",
+      "source": "e001",
+      "target": "e004",
+      "directed": true,
+      "strength": 0.7,
+      "attributes": {
+        "campaign_name": "Operation Cash Out",
+        "start_date": "2023-01-01",
+        "success": "Partial",
+        "notes": "Targeted phishing and malware deployment"
+      }
+    },
+    {
+      "id": "r004",
+      "type": "works_at",
+      "source": "e005",
+      "target": "e004",
+      "directed": true,
+      "strength": 1.0,
+      "attributes": {
+        "position": "CISO",
+        "department": "Information Security",
+        "years": 5,
+        "notes": "Senior executive with access to sensitive systems"
+      }
+    },
+    {
+      "id": "r005",
+      "type": "targets",
+      "source": "e002",
+      "target": "e005",
+      "directed": true,
+      "strength": 0.8,
+      "attributes": {
+        "method": "Spear Phishing",
+        "success": false,
+        "attempts": 3,
+        "notes": "Multiple attempts to compromise executive's credentials"
+      }
+    },
+    {
+      "id": "r006",
+      "type": "communicates",
+      "source": "e002",
+      "target": "e006",
+      "directed": true,
+      "strength": 0.95,
+      "attributes": {
+        "protocol": "HTTPS",
+        "encrypted": true,
+        "frequency": "Daily",
+        "notes": "Malware communicates with C2 server for instructions and data exfiltration"
+      }
+    },
+    {
+      "id": "r007",
+      "type": "knows",
+      "source": "e001",
+      "target": "e007",
+      "directed": false,
+      "strength": 0.4,
+      "attributes": {
+        "relationship": "Information Sharing",
+        "confidence": "Medium",
+        "notes": "Evidence suggests limited collaboration between groups"
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "ev001",
+      "type": "incident",
+      "title": "Initial Compromise Attempt",
+      "description": "Spear phishing campaign targeting Global Financial Corp executives",
+      "time": "2023-02-10T09:15:00Z",
+      "entities": ["e001", "e004", "e005"],
+      "attributes": {
+        "attack_vector": "Email",
+        "success_rate": 0.2,
+        "targets_count": 15,
+        "notes": "Emails contained malicious attachments disguised as financial reports"
+      }
+    },
+    {
+      "id": "ev002",
+      "type": "incident",
+      "title": "Vulnerability Exploitation",
+      "description": "APT-29 exploited CVE-2023-1337 to deploy malware",
+      "time": "2023-02-15T14:30:00Z",
+      "entities": ["e001", "e003", "e004"],
+      "attributes": {
+        "affected_systems": 3,
+        "detection_time": "6 hours",
+        "mitigation": "Partial",
+        "notes": "Zero-day exploit used to establish initial foothold"
+      }
+    },
+    {
+      "id": "ev003",
+      "type": "incident",
+      "title": "Malware Deployment",
+      "description": "Darkhotel malware deployed on compromised systems",
+      "time": "2023-02-15T18:45:00Z",
+      "entities": ["e001", "e002", "e004"],
+      "attributes": {
+        "infection_count": 2,
+        "persistence_method": "Registry modification",
+        "detected_by": "EDR solution",
+        "notes": "Malware established persistence and began data collection"
+      }
+    },
+    {
+      "id": "ev004",
+      "type": "communication",
+      "title": "C2 Communication Established",
+      "description": "Malware established communication with command and control server",
+      "time": "2023-02-15T19:10:00Z",
+      "entities": ["e002", "e006"],
+      "attributes": {
+        "protocol": "HTTPS",
+        "data_volume": "Minimal",
+        "duration": "37 minutes",
+        "notes": "Initial beacon and configuration download"
+      }
+    },
+    {
+      "id": "ev005",
+      "type": "incident",
+      "title": "Incident Detection",
+      "description": "Security team detected and began responding to the breach",
+      "time": "2023-02-15T22:05:00Z",
+      "entities": ["e004", "e005"],
+      "attributes": {
+        "detection_method": "Network traffic analysis",
+        "response_team": "Incident Response Team Alpha",
+        "initial_actions": ["Isolation", "Evidence collection"],
+        "notes": "SOC analyst identified suspicious outbound connections"
+      }
+    }
+  ],
+  "locations": [
+    {
+      "id": "l001",
+      "name": "Moscow",
+      "latitude": 55.7558,
+      "longitude": 37.6173,
+      "type": "city",
+      "address": "Moscow, Russia",
+      "attributes": {
+        "significance": "Suspected base of APT-29 operations",
+        "confidence": "Medium",
+        "notes": "Multiple technical indicators point to this location"
+      }
+    },
+    {
+      "id": "l002",
+      "name": "Global Financial Corp HQ",
+      "latitude": 40.7128,
+      "longitude": -74.0060,
+      "type": "building",
+      "address": "100 Wall Street, New York, NY",
+      "attributes": {
+        "facility_type": "Corporate Headquarters",
+        "security_level": "High",
+        "notes": "Primary target of the cyber campaign"
+      }
+    },
+    {
+      "id": "l003",
+      "name": "C2 Server Location",
+      "latitude": 50.1109,
+      "longitude": 8.6821,
+      "type": "building",
+      "address": "Frankfurt, Germany",
+      "attributes": {
+        "facility_type": "Data Center",
+        "hosting_provider": "Anonymous Hosting Ltd",
+        "notes": "Server physically located in this data center"
+      }
+    },
+    {
+      "id": "l004",
+      "name": "Pyongyang",
+      "latitude": 39.0392,
+      "longitude": 125.7625,
+      "type": "city",
+      "address": "Pyongyang, North Korea",
+      "attributes": {
+        "significance": "Base of Lazarus Group operations",
+        "confidence": "High",
+        "notes": "Known location of state-sponsored cyber operations"
+      }
+    }
+  ],
+  "metadata": {
+    "created": "2023-03-01T10:00:00Z",
+    "lastUpdated": "2023-03-15T16:45:00Z",
+    "classification": "Restricted",
+    "analyst": "Cyber Threat Intelligence Team",
+    "status": "Active Investigation"
+  }
+}

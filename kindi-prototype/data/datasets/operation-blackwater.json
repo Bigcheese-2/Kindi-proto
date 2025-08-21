@@ -1,0 +1,355 @@
+{
+  "id": "operation-blackwater",
+  "name": "Operation Blackwater",
+  "description": "Intelligence analysis dataset for Operation Blackwater investigation",
+  "entities": [
+    {
+      "id": "e001",
+      "type": "person",
+      "name": "Viktor Petrov",
+      "attributes": {
+        "age": 42,
+        "nationality": "Russian",
+        "occupation": "Businessman",
+        "notes": "Key person of interest with connections to multiple organizations"
+      },
+      "risk": 0.8
+    },
+    {
+      "id": "e002",
+      "type": "organization",
+      "name": "Global Solutions Ltd",
+      "attributes": {
+        "industry": "Consulting",
+        "founded": "2010-03-15",
+        "headquarters": "London",
+        "employees": 120,
+        "notes": "Front company suspected of money laundering activities"
+      },
+      "risk": 0.7
+    },
+    {
+      "id": "e003",
+      "type": "person",
+      "name": "Maria Rodriguez",
+      "attributes": {
+        "age": 35,
+        "nationality": "Spanish",
+        "occupation": "Financial Analyst",
+        "notes": "Works for Global Solutions Ltd, handles international transactions"
+      },
+      "risk": 0.5
+    },
+    {
+      "id": "e004",
+      "type": "organization",
+      "name": "BlackSea Investments",
+      "attributes": {
+        "industry": "Finance",
+        "founded": "2015-07-22",
+        "headquarters": "Kyiv",
+        "notes": "Investment firm with suspicious transaction patterns"
+      },
+      "risk": 0.9
+    },
+    {
+      "id": "e005",
+      "type": "person",
+      "name": "Alexei Kuznetsov",
+      "attributes": {
+        "age": 51,
+        "nationality": "Ukrainian",
+        "occupation": "CEO",
+        "notes": "CEO of BlackSea Investments, former government official"
+      },
+      "risk": 0.75
+    },
+    {
+      "id": "e006",
+      "type": "digital",
+      "name": "offshore-accounts@securemail.com",
+      "attributes": {
+        "type": "Email",
+        "provider": "SecureMail",
+        "notes": "Email account used for communication about offshore transactions"
+      },
+      "risk": 0.6
+    },
+    {
+      "id": "e007",
+      "type": "location",
+      "name": "Warehouse 7",
+      "attributes": {
+        "type": "Building",
+        "address": "17 Dock Street, London",
+        "notes": "Location of suspected illegal goods storage"
+      },
+      "risk": 0.65
+    }
+  ],
+  "relationships": [
+    {
+      "id": "r001",
+      "type": "owns",
+      "source": "e001",
+      "target": "e002",
+      "directed": true,
+      "strength": 0.9,
+      "attributes": {
+        "ownership_percentage": 75,
+        "through_proxy": true,
+        "notes": "Ownership concealed through offshore companies"
+      }
+    },
+    {
+      "id": "r002",
+      "type": "knows",
+      "source": "e001",
+      "target": "e005",
+      "directed": false,
+      "strength": 0.8,
+      "startTime": "2016-03-15",
+      "attributes": {
+        "relationship": "Business Partners",
+        "meetings_count": 15,
+        "notes": "Regular meetings in various European cities"
+      }
+    },
+    {
+      "id": "r003",
+      "type": "communicates",
+      "source": "e003",
+      "target": "e005",
+      "directed": true,
+      "strength": 0.7,
+      "attributes": {
+        "medium": "Email",
+        "frequency": "Weekly",
+        "encrypted": true,
+        "notes": "Communication about financial transfers"
+      }
+    },
+    {
+      "id": "r004",
+      "type": "works_at",
+      "source": "e003",
+      "target": "e002",
+      "directed": true,
+      "strength": 0.95,
+      "startTime": "2018-05-10",
+      "attributes": {
+        "position": "Senior Financial Analyst",
+        "department": "International Operations",
+        "notes": "Handles sensitive financial operations"
+      }
+    },
+    {
+      "id": "r005",
+      "type": "owns",
+      "source": "e005",
+      "target": "e004",
+      "directed": true,
+      "strength": 1.0,
+      "attributes": {
+        "ownership_percentage": 100,
+        "notes": "Full ownership and control"
+      }
+    },
+    {
+      "id": "r006",
+      "type": "communicates",
+      "source": "e001",
+      "target": "e006",
+      "directed": true,
+      "strength": 0.6,
+      "attributes": {
+        "medium": "Email",
+        "frequency": "Monthly",
+        "notes": "Uses this email for sensitive communications"
+      }
+    },
+    {
+      "id": "r007",
+      "type": "located_at",
+      "source": "e002",
+      "target": "e007",
+      "directed": true,
+      "strength": 0.5,
+      "attributes": {
+        "relationship": "Secondary Location",
+        "purpose": "Storage",
+        "notes": "Warehouse used occasionally by company"
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "ev001",
+      "type": "meeting",
+      "title": "Strategic Planning Meeting",
+      "description": "Meeting between Viktor Petrov and Alexei Kuznetsov to discuss investment strategy",
+      "time": "2023-05-10T14:30:00Z",
+      "endTime": "2023-05-10T16:00:00Z",
+      "entities": ["e001", "e005"],
+      "location": {
+        "id": "l001",
+        "name": "Grand Hotel",
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "type": "building",
+        "address": "1 Main Street, London"
+      },
+      "attributes": {
+        "security_level": "High",
+        "observed": true,
+        "notes": "Meeting monitored by surveillance team"
+      }
+    },
+    {
+      "id": "ev002",
+      "type": "transaction",
+      "title": "Large Fund Transfer",
+      "description": "Transfer of €2.5 million from Global Solutions to BlackSea Investments",
+      "time": "2023-06-15T10:15:00Z",
+      "entities": ["e002", "e004"],
+      "attributes": {
+        "amount": 2500000,
+        "currency": "EUR",
+        "method": "Wire Transfer",
+        "reference": "Project Neptune",
+        "notes": "Suspicious transaction flagged by monitoring system"
+      }
+    },
+    {
+      "id": "ev003",
+      "type": "travel",
+      "title": "Petrov travels to Kyiv",
+      "description": "Viktor Petrov travels to Kyiv for a week-long business trip",
+      "time": "2023-07-03T08:45:00Z",
+      "endTime": "2023-07-10T16:30:00Z",
+      "entities": ["e001"],
+      "location": {
+        "id": "l002",
+        "name": "Kyiv",
+        "latitude": 50.4501,
+        "longitude": 30.5234,
+        "type": "city",
+        "address": "Kyiv, Ukraine"
+      },
+      "attributes": {
+        "transport": "Private Jet",
+        "purpose": "Business",
+        "notes": "Met with multiple local business contacts"
+      }
+    },
+    {
+      "id": "ev004",
+      "type": "communication",
+      "title": "Email Exchange about Offshore Accounts",
+      "description": "Series of emails discussing the setup of new offshore accounts",
+      "time": "2023-08-05T09:20:00Z",
+      "entities": ["e001", "e003", "e006"],
+      "attributes": {
+        "medium": "Email",
+        "encrypted": true,
+        "attachments": 3,
+        "notes": "Emails contained spreadsheets with account details"
+      }
+    },
+    {
+      "id": "ev005",
+      "type": "incident",
+      "title": "Warehouse Inspection",
+      "description": "Regulatory authorities conducted an unannounced inspection of Warehouse 7",
+      "time": "2023-09-12T11:00:00Z",
+      "endTime": "2023-09-12T15:30:00Z",
+      "entities": ["e007"],
+      "location": {
+        "id": "l003",
+        "name": "Warehouse 7",
+        "latitude": 51.5085,
+        "longitude": -0.0762,
+        "type": "building",
+        "address": "17 Dock Street, London"
+      },
+      "attributes": {
+        "authority": "Financial Conduct Authority",
+        "outcome": "No findings",
+        "notes": "Warehouse appeared to have been cleared shortly before inspection"
+      }
+    }
+  ],
+  "locations": [
+    {
+      "id": "l001",
+      "name": "Grand Hotel",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "type": "building",
+      "address": "1 Main Street, London",
+      "attributes": {
+        "category": "Hotel",
+        "security": "High",
+        "notes": "Frequent meeting location for business executives"
+      }
+    },
+    {
+      "id": "l002",
+      "name": "Kyiv",
+      "latitude": 50.4501,
+      "longitude": 30.5234,
+      "type": "city",
+      "address": "Kyiv, Ukraine",
+      "attributes": {
+        "population": 2884000,
+        "notes": "Capital city with significant business activity"
+      }
+    },
+    {
+      "id": "l003",
+      "name": "Warehouse 7",
+      "latitude": 51.5085,
+      "longitude": -0.0762,
+      "type": "building",
+      "address": "17 Dock Street, London",
+      "attributes": {
+        "size": "2500 sqm",
+        "security": "Medium",
+        "notes": "Industrial area with minimal surveillance"
+      }
+    },
+    {
+      "id": "l004",
+      "name": "Global Solutions Headquarters",
+      "latitude": 51.5142,
+      "longitude": -0.0931,
+      "type": "building",
+      "address": "25 Financial Avenue, London",
+      "attributes": {
+        "floors": 12,
+        "employees": 120,
+        "notes": "Modern office building in financial district"
+      }
+    },
+    {
+      "id": "l005",
+      "name": "BlackSea Investments Office",
+      "latitude": 50.4547,
+      "longitude": 30.5238,
+      "type": "building",
+      "address": "45 Business Center, Kyiv",
+      "attributes": {
+        "floors": 8,
+        "employees": 35,
+        "notes": "Located in premium business center"
+      }
+    }
+  ],
+  "metadata": {
+    "created": "2023-10-01T08:00:00Z",
+    "lastUpdated": "2023-10-15T14:30:00Z",
+    "classification": "Confidential",
+    "caseOfficer": "Agent Smith",
+    "status": "Active Investigation"
+  }
+}
