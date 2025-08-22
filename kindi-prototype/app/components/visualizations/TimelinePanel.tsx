@@ -1,15 +1,40 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
+import ExportButton from '../export/ExportButton';
+import { ExportService, ExportOptions, saveExportedContent } from '@/app/lib/export/exportService';
 
 export default function TimelinePanel() {
   const [viewMode, setViewMode] = useState('real-time');
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const exportService = new ExportService();
+  
+  // Handle export
+  const handleExport = useCallback(async (options: ExportOptions) => {
+    try {
+      if (!timelineRef.current) {
+        throw new Error('Timeline reference is not available');
+      }
+      
+      const result = await exportService.exportTimeline(timelineRef, options);
+      
+      // Save the exported content
+      saveExportedContent(
+        result,
+        options.filename || `timeline.${options.format}`
+      );
+    } catch (error) {
+      console.error('Error exporting timeline:', error);
+      alert('Failed to export timeline. Please try again.');
+    }
+  }, [exportService]);
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 className="text-neutral-light font-secondary font-semibold">Timeline Analysis</h2>
         <div className="flex space-x-2">
+          <ExportButton exportType="timeline" onExport={handleExport} />
           <button 
             className={`px-3 py-1 rounded text-sm ${viewMode === 'real-time' ? 'bg-accent text-white' : 'bg-gray-700 text-neutral-medium hover:bg-gray-600'}`}
             onClick={() => setViewMode('real-time')}
@@ -35,7 +60,10 @@ export default function TimelinePanel() {
         </div>
       </div>
       
-      <div className="flex-1 bg-primary p-4 flex flex-col">
+      <div 
+        ref={timelineRef}
+        className="flex-1 bg-primary p-4 flex flex-col"
+      >
         <div className="text-neutral-medium mb-2">Meetings</div>
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full h-2 bg-gray-800 rounded-full relative">

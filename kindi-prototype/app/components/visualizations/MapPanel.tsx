@@ -1,15 +1,40 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
+import ExportButton from '../export/ExportButton';
+import { ExportService, ExportOptions, saveExportedContent } from '@/app/lib/export/exportService';
 
 export default function MapPanel() {
   const [mapType, setMapType] = useState('satellite');
+  const mapRef = useRef<HTMLDivElement>(null);
+  const exportService = new ExportService();
+  
+  // Handle export
+  const handleExport = useCallback(async (options: ExportOptions) => {
+    try {
+      if (!mapRef.current) {
+        throw new Error('Map reference is not available');
+      }
+      
+      const result = await exportService.exportMap(mapRef, options);
+      
+      // Save the exported content
+      saveExportedContent(
+        result,
+        options.filename || `geographic-map.${options.format}`
+      );
+    } catch (error) {
+      console.error('Error exporting map:', error);
+      alert('Failed to export map. Please try again.');
+    }
+  }, [exportService]);
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 className="text-neutral-light font-secondary font-semibold">Geographic View</h2>
         <div className="flex space-x-2">
+          <ExportButton exportType="map" onExport={handleExport} />
           <button 
             className={`px-3 py-1 rounded text-sm ${mapType === 'satellite' ? 'bg-accent text-white' : 'bg-gray-700 text-neutral-medium hover:bg-gray-600'}`}
             onClick={() => setMapType('satellite')}
@@ -25,7 +50,10 @@ export default function MapPanel() {
         </div>
       </div>
       
-      <div className="flex-1 bg-primary flex items-center justify-center p-4 relative">
+      <div 
+        ref={mapRef}
+        className="flex-1 bg-primary flex items-center justify-center p-4 relative"
+      >
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <svg className="w-16 h-16 text-accent mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
