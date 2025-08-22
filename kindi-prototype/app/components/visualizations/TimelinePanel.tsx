@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useData } from '@/app/contexts/DataContext';
-import { useSelectionSync } from '@/app/hooks/useSelectionSync';
+import { useSelection } from '@/app/contexts/SelectionContext';
 import ExportButton from '../core/export/ExportButton';
 
 export default function TimelinePanel() {
@@ -12,9 +12,10 @@ export default function TimelinePanel() {
   const { 
     selectedEventIds, 
     selectEvent, 
-    isEventSelected, 
     clearSelection 
-  } = useSelectionSync('timeline');
+  } = useSelection();
+  
+  const isEventSelected = (eventId: string) => selectedEventIds.includes(eventId);
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">

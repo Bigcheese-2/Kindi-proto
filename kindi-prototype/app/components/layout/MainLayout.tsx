@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import AppHeader from './AppHeader';
 import InspectorPanel from './InspectorPanel';
-import NetworkGraphPanel from '../visualizations/NetworkGraphPanel';
+import GraphPanel from '../visualizations/GraphPanel';
 import TimelinePanel from '../visualizations/TimelinePanel';
 import MapPanel from '../visualizations/MapPanel';
 import { UIProvider } from '@/app/contexts/UIContext';
@@ -44,7 +44,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         <div className="flex-1 p-2">
                           <div className="grid grid-cols-2 grid-rows-2 gap-4 h-full">
                             <div className="col-span-1 row-span-1">
-                              <NetworkGraphPanel />
+                              <GraphPanel />
                             </div>
                             
                             <div className="col-span-1 row-span-1 grid grid-rows-2 gap-4">

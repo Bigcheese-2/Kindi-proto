@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useData } from '@/app/contexts/DataContext';
-import { useSelectionSync } from '@/app/hooks/useSelectionSync';
+import { useSelection } from '@/app/contexts/SelectionContext';
 import ExportButton from '../core/export/ExportButton';
 
 export default function MapPanel() {
@@ -12,9 +12,10 @@ export default function MapPanel() {
   const { 
     selectedLocationIds, 
     selectLocation, 
-    isLocationSelected, 
     clearSelection 
-  } = useSelectionSync('map');
+  } = useSelection();
+  
+  const isLocationSelected = (locationId: string) => selectedLocationIds.includes(locationId);
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">

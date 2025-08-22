@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { useData } from '@/app/contexts/DataContext';
-import { ExportService } from '@/app/lib/export/exportService';
+import { ExportService, ExportFormat } from '@/app/lib/export/exportService';
 import { filterDataForExport, extractFieldsForExport } from '@/app/lib/export/dataExport';
 import { downloadContent, getMimeType } from '@/app/lib/export/visualExport';
 import ExportDialog from './ExportDialog';
@@ -17,13 +17,13 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  
+
   const exportService = new ExportService();
-  
+
   // Get data based on selected type
   const getData = () => {
     if (!currentDataset) return [];
-    
+
     switch (dataType) {
       case 'entities':
         return currentDataset.entities || [];
@@ -35,21 +35,21 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
         return [];
     }
   };
-  
+
   // Get available fields for selected data type
   const getAvailableFields = () => {
     const data = getData();
     if (data.length === 0) return [];
-    
+
     // Get all unique fields from the data
     const allFields = new Set<string>();
     data.forEach(item => {
       Object.keys(item).forEach(key => allFields.add(key));
     });
-    
+
     return Array.from(allFields).sort();
   };
-  
+
   // Handle field selection change
   const handleFieldChange = (field: string) => {
     setSelectedFields(prev => {
@@ -60,18 +60,18 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
       }
     });
   };
-  
+
   // Handle select all fields
   const handleSelectAllFields = () => {
     const fields = getAvailableFields();
     setSelectedFields(fields);
   };
-  
+
   // Handle clear all fields
   const handleClearFields = () => {
     setSelectedFields([]);
   };
-  
+
   // Handle item selection change
   const handleItemSelection = (id: string) => {
     setSelectedIds(prev => {
@@ -82,38 +82,44 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
       }
     });
   };
-  
+
   // Handle select all items
   const handleSelectAllItems = () => {
     const data = getData();
     setSelectedIds(data.map(item => item.id));
   };
-  
+
   // Handle clear all items
   const handleClearItems = () => {
     setSelectedIds([]);
   };
-  
+
   // Handle export
   const handleExport = async (options: {
-    format: 'csv' | 'json';
+    format: ExportFormat;
     includeMetadata?: boolean;
     filename?: string;
   }) => {
+    // For data export, only support csv and json formats
+    if (options.format !== 'csv' && options.format !== 'json') {
+      console.error('Data export only supports CSV and JSON formats');
+      alert('Data export only supports CSV and JSON formats');
+      return;
+    }
     try {
       // Get data to export
       let data = getData();
-      
+
       // Filter by selected IDs if any
       if (selectedIds.length > 0) {
         data = filterDataForExport(data, selectedIds);
       }
-      
+
       // Filter by selected fields if any
       if (selectedFields.length > 0) {
         data = extractFieldsForExport(data, selectedFields);
       }
-      
+
       // Add metadata if requested
       const exportData = options.includeMetadata
         ? {
@@ -121,19 +127,19 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
               exportedAt: new Date().toISOString(),
               dataType,
               totalItems: data.length,
-              datasetName: currentDataset?.name || 'Unknown'
+              datasetName: currentDataset?.name || 'Unknown',
             },
-            data
+            data,
           }
         : data;
-      
+
       // Export data
       const result = await exportService.exportData(exportData, {
         format: options.format,
         filename: options.filename,
-        includeMetadata: options.includeMetadata
+        includeMetadata: options.includeMetadata,
       });
-      
+
       // Download the result
       downloadContent(
         result,
@@ -145,10 +151,10 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
       alert('Error exporting data');
     }
   };
-  
+
   const availableFields = getAvailableFields();
   const data = getData();
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-auto">
@@ -162,14 +168,14 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
             ✕
           </button>
         </div>
-        
+
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-2">Select Data Type</h3>
           <div className="flex space-x-4">
             <button
               className={`px-4 py-2 rounded ${
-                dataType === 'entities' 
-                  ? 'bg-blue-500 text-white' 
+                dataType === 'entities'
+                  ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
               onClick={() => setDataType('entities')}
@@ -178,8 +184,8 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
             </button>
             <button
               className={`px-4 py-2 rounded ${
-                dataType === 'events' 
-                  ? 'bg-blue-500 text-white' 
+                dataType === 'events'
+                  ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
               onClick={() => setDataType('events')}
@@ -188,8 +194,8 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
             </button>
             <button
               className={`px-4 py-2 rounded ${
-                dataType === 'locations' 
-                  ? 'bg-blue-500 text-white' 
+                dataType === 'locations'
+                  ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
               onClick={() => setDataType('locations')}
@@ -198,7 +204,7 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
             </button>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -218,7 +224,7 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
                 </button>
               </div>
             </div>
-            
+
             <div className="border rounded-md p-4 h-64 overflow-y-auto">
               {availableFields.length === 0 ? (
                 <div className="text-gray-500">No fields available</div>
@@ -239,7 +245,7 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
               )}
             </div>
           </div>
-          
+
           <div>
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-medium">Select Items</h3>
@@ -258,7 +264,7 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
                 </button>
               </div>
             </div>
-            
+
             <div className="border rounded-md p-4 h-64 overflow-y-auto">
               {data.length === 0 ? (
                 <div className="text-gray-500">No items available</div>
@@ -273,7 +279,11 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
                         className="mr-2"
                       />
                       <span>
-                        {item.name || item.title || `ID: ${item.id.substring(0, 8)}`}
+                        {'name' in item && item.name
+                          ? item.name
+                          : 'title' in item && item.title
+                            ? item.title
+                            : `ID: ${item.id.substring(0, 8)}`}
                       </span>
                     </label>
                   ))}
@@ -282,12 +292,9 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex justify-end mt-6 space-x-2">
-          <button
-            className="px-4 py-2 border rounded hover:bg-gray-100"
-            onClick={onClose}
-          >
+          <button className="px-4 py-2 border rounded hover:bg-gray-100" onClick={onClose}>
             Cancel
           </button>
           <button
@@ -298,7 +305,7 @@ const DataExportPanel: React.FC<DataExportPanelProps> = ({ onClose }) => {
             Export
           </button>
         </div>
-        
+
         {isDialogOpen && (
           <ExportDialog
             isOpen={isDialogOpen}
