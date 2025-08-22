@@ -1,179 +1,133 @@
 'use client';
 
-import React, { useCallback, useRef, useState } from 'react';
-import { useData } from '../../contexts/DataContext';
-import { useSelection } from '../../contexts/SelectionContext';
-import TimelineComponent from './timeline/TimelineComponent';
-import TimelineControls from './timeline/TimelineControls';
+import { useState, useEffect, useRef } from 'react';
+import { useData } from '@/app/contexts/DataContext';
+import { useSelection } from '@/app/contexts/SelectionContext';
+import ExportButton from '../core/export/ExportButton';
 
 export default function TimelinePanel() {
-  const { currentDataset, isLoading, error } = useData();
-  const { selectedEventIds, selectEvent } = useSelection();
-  const timelineRef = useRef<any>();
-  const [viewMode, setViewMode] = useState('all');
-
-  const handleEventClick = useCallback(
-    (eventId: string) => {
-      selectEvent(eventId);
-    },
-    [selectEvent]
-  );
-
-  const handleZoomIn = useCallback(() => {
-    if (timelineRef.current) {
-      const range = timelineRef.current.getWindow();
-      const interval = range.end - range.start;
-      const newInterval = interval * 0.8;
-      const center = range.start + interval / 2;
-      timelineRef.current.setWindow(center - newInterval / 2, center + newInterval / 2);
-    }
-  }, []);
-
-  const handleZoomOut = useCallback(() => {
-    if (timelineRef.current) {
-      const range = timelineRef.current.getWindow();
-      const interval = range.end - range.start;
-      const newInterval = interval * 1.2;
-      const center = range.start + interval / 2;
-      timelineRef.current.setWindow(center - newInterval / 2, center + newInterval / 2);
-    }
-  }, []);
-
-  const handleFitToData = useCallback(() => {
-    if (timelineRef.current) {
-      timelineRef.current.fit();
-    }
-  }, []);
-
-  const handleToday = useCallback(() => {
-    if (timelineRef.current) {
-      const now = new Date();
-      const start = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
-      const end = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours ahead
-      timelineRef.current.setWindow(start, end);
-    }
-  }, []);
-
-  const handleTimePeriod = useCallback((period: 'day' | 'week' | 'month' | 'year') => {
-    if (timelineRef.current) {
-      const now = new Date();
-      let start: Date;
-
-      switch (period) {
-        case 'day':
-          start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-          break;
-        case 'week':
-          start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          break;
-        case 'month':
-          start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          break;
-        case 'year':
-          start = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-          break;
-        default:
-          start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      }
-
-      timelineRef.current.setWindow(start, now);
-    }
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h2 className="text-neutral-light font-secondary font-semibold">Timeline Analysis</h2>
-        </div>
-        <div className="flex-1 bg-primary flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-            <p className="text-neutral-medium">Loading timeline data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h2 className="text-neutral-light font-secondary font-semibold">Timeline Analysis</h2>
-        </div>
-        <div className="flex-1 bg-primary flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-error mb-4">
-              <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <p className="text-neutral-medium">Error loading timeline: {error}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentDataset || !currentDataset.events || currentDataset.events.length === 0) {
-    return (
-      <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h2 className="text-neutral-light font-secondary font-semibold">Timeline Analysis</h2>
-        </div>
-        <div className="flex-1 bg-primary flex items-center justify-center">
-          <div className="text-center">
-            <svg
-              className="w-16 h-16 text-accent mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <p className="text-neutral-medium">No events to display in timeline</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const [viewMode, setViewMode] = useState('real-time');
+  const { currentDataset, isLoading } = useData();
+  const { 
+    selectedEventIds, 
+    selectEvent, 
+    clearSelection 
+  } = useSelection();
+  
+  const isEventSelected = (eventId: string) => selectedEventIds.includes(eventId);
+  
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 className="text-neutral-light font-secondary font-semibold">Timeline Analysis</h2>
-        <div className="text-sm text-neutral-medium">{currentDataset.events.length} events</div>
+        <div className="flex space-x-2">
+          <ExportButton
+            exportType="timeline"
+            elementRef={timelineRef}
+            className="px-3 py-1 rounded text-sm bg-gray-700 text-neutral-medium hover:bg-gray-600"
+            buttonText="Export"
+          />
+          <button 
+            className={`px-3 py-1 rounded text-sm ${viewMode === 'real-time' ? 'bg-accent text-white' : 'bg-gray-700 text-neutral-medium hover:bg-gray-600'}`}
+            onClick={() => setViewMode('real-time')}
+          >
+            <div className="flex items-center">
+              <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Real-time
+            </div>
+          </button>
+          <button 
+            className={`px-3 py-1 rounded text-sm ${viewMode === 'layers' ? 'bg-accent text-white' : 'bg-gray-700 text-neutral-medium hover:bg-gray-600'}`}
+            onClick={() => setViewMode('layers')}
+          >
+            <div className="flex items-center">
+              <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Layers
+            </div>
+          </button>
+        </div>
       </div>
-
-      <div className="flex-1 relative bg-primary">
-        {/* Timeline Controls */}
-        <TimelineControls
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onFitToData={handleFitToData}
-          onToday={handleToday}
-          onTimePeriod={handleTimePeriod}
-          className="absolute top-4 left-4 z-10"
-        />
-
-        {/* Timeline Component */}
-        <TimelineComponent
-          ref={timelineRef}
-          events={currentDataset.events}
-          selectedEventIds={selectedEventIds}
-          onEventClick={handleEventClick}
-          className="h-full"
-        />
+      
+      <div ref={timelineRef} className="flex-1 bg-primary p-4 flex flex-col">
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-neutral-light">Loading timeline data...</div>
+          </div>
+        ) : !currentDataset?.events?.length ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-neutral-light">No event data available</div>
+          </div>
+        ) : (
+          <>
+            <div className="text-neutral-medium mb-2">Events</div>
+            <div className="flex-1 flex flex-col">
+              <div className="w-full h-12 bg-gray-800 rounded-lg relative mb-4">
+                {/* Timeline scale */}
+                <div className="absolute inset-x-0 top-0 flex justify-between px-4 text-xs text-neutral-medium">
+                  <span>Jan</span>
+                  <span>Feb</span>
+                  <span>Mar</span>
+                  <span>Apr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+                </div>
+                
+                {/* Event markers */}
+                {currentDataset.events.slice(0, 5).map((event, index) => {
+                  const position = (index / 4) * 100; // Simple positioning for demo
+                  return (
+                    <button
+                      key={event.id}
+                      className={`absolute h-4 w-4 rounded-full ${
+                        isEventSelected(event.id) ? 'bg-highlight' : 'bg-accent'
+                      } transform -translate-y-1/2`}
+                      style={{ left: `${position}%`, top: '50%' }}
+                      onClick={() => selectEvent(event.id)}
+                      title={event.title}
+                    ></button>
+                  );
+                })}
+              </div>
+              
+              {/* Event details */}
+              <div className="flex-1 overflow-y-auto">
+                {currentDataset.events.slice(0, 5).map(event => (
+                  <div 
+                    key={event.id}
+                    className={`p-3 mb-2 rounded-md ${
+                      isEventSelected(event.id) ? 'bg-gray-700 border border-highlight' : 'bg-gray-800'
+                    }`}
+                    onClick={() => selectEvent(event.id)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-sm font-medium text-neutral-light">{event.title}</h4>
+                      <span className="text-xs text-neutral-medium">
+                        {new Date(event.time).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {event.description && (
+                      <p className="text-xs text-neutral-medium mt-1">{event.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-3 text-right">
+                <button 
+                  className="px-3 py-1 bg-gray-700 text-neutral-light rounded hover:bg-gray-600 text-sm"
+                  onClick={clearSelection}
+                >
+                  Clear Selection
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

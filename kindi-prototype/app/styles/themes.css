@@ -1,0 +1,101 @@
+/* Base theme variables */
+:root {
+  /* Light theme colors (default) */
+  --background-primary: #ffffff;
+  --background-secondary: #f5f5f5;
+  --background-tertiary: #e9e9e9;
+  --text-primary: #1a1a1a;
+  --text-secondary: #555555;
+  --text-tertiary: #888888;
+  --border-color: #dddddd;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  
+  /* Accent colors */
+  --blue: #2563eb;
+  --green: #10b981;
+  --purple: #8b5cf6;
+  --orange: #f59e0b;
+  --red: #ef4444;
+  
+  /* Default accent */
+  --accent-color: var(--blue);
+  
+  /* Font sizes */
+  --font-size-small: 0.875rem;
+  --font-size-medium: 1rem;
+  --font-size-large: 1.125rem;
+  
+  /* Transitions */
+  --transition-speed: 0.2s;
+}
+
+/* Dark theme */
+.theme-dark {
+  --background-primary: #121212;
+  --background-secondary: #1e1e1e;
+  --background-tertiary: #2d2d2d;
+  --text-primary: #f5f5f5;
+  --text-secondary: #b3b3b3;
+  --text-tertiary: #888888;
+  --border-color: #444444;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* High contrast mode */
+.high-contrast {
+  --text-primary: #ffffff;
+  --text-secondary: #eeeeee;
+  --background-primary: #000000;
+  --background-secondary: #121212;
+  --background-tertiary: #1e1e1e;
+  --border-color: #ffffff;
+  --accent-color: #ffff00; /* Yellow for high visibility */
+}
+
+/* Font size variations */
+.font-small {
+  font-size: var(--font-size-small);
+}
+
+.font-medium {
+  font-size: var(--font-size-medium);
+}
+
+.font-large {
+  font-size: var(--font-size-large);
+}
+
+/* Apply variables to elements */
+body {
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+/* Component-specific theme styles */
+.panel {
+  background-color: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.button-primary {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.button-secondary {
+  background-color: var(--background-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+/* Focus styles for accessibility */
+:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.high-contrast :focus {
+  outline: 3px solid white;
+}
