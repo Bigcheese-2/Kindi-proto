@@ -1,9 +1,18 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useData } from '@/app/contexts/DataContext';
+import { useSelectionSync } from '@/app/hooks/useSelectionSync';
 
 export default function TimelinePanel() {
   const [viewMode, setViewMode] = useState('real-time');
+  const { currentDataset, isLoading } = useData();
+  const { 
+    selectedEventIds, 
+    selectEvent, 
+    isEventSelected, 
+    clearSelection 
+  } = useSelectionSync('timeline');
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
@@ -36,12 +45,80 @@ export default function TimelinePanel() {
       </div>
       
       <div className="flex-1 bg-primary p-4 flex flex-col">
-        <div className="text-neutral-medium mb-2">Meetings</div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-full h-2 bg-gray-800 rounded-full relative">
-            <div className="absolute top-0 left-1/4 w-2 h-2 bg-error rounded-full transform -translate-y-1/4"></div>
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-neutral-light">Loading timeline data...</div>
           </div>
-        </div>
+        ) : !currentDataset?.events?.length ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-neutral-light">No event data available</div>
+          </div>
+        ) : (
+          <>
+            <div className="text-neutral-medium mb-2">Events</div>
+            <div className="flex-1 flex flex-col">
+              <div className="w-full h-12 bg-gray-800 rounded-lg relative mb-4">
+                {/* Timeline scale */}
+                <div className="absolute inset-x-0 top-0 flex justify-between px-4 text-xs text-neutral-medium">
+                  <span>Jan</span>
+                  <span>Feb</span>
+                  <span>Mar</span>
+                  <span>Apr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+                </div>
+                
+                {/* Event markers */}
+                {currentDataset.events.slice(0, 5).map((event, index) => {
+                  const position = (index / 4) * 100; // Simple positioning for demo
+                  return (
+                    <button
+                      key={event.id}
+                      className={`absolute h-4 w-4 rounded-full ${
+                        isEventSelected(event.id) ? 'bg-highlight' : 'bg-accent'
+                      } transform -translate-y-1/2`}
+                      style={{ left: `${position}%`, top: '50%' }}
+                      onClick={() => selectEvent(event.id)}
+                      title={event.title}
+                    ></button>
+                  );
+                })}
+              </div>
+              
+              {/* Event details */}
+              <div className="flex-1 overflow-y-auto">
+                {currentDataset.events.slice(0, 5).map(event => (
+                  <div 
+                    key={event.id}
+                    className={`p-3 mb-2 rounded-md ${
+                      isEventSelected(event.id) ? 'bg-gray-700 border border-highlight' : 'bg-gray-800'
+                    }`}
+                    onClick={() => selectEvent(event.id)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-sm font-medium text-neutral-light">{event.title}</h4>
+                      <span className="text-xs text-neutral-medium">
+                        {new Date(event.time).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {event.description && (
+                      <p className="text-xs text-neutral-medium mt-1">{event.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-3 text-right">
+                <button 
+                  className="px-3 py-1 bg-gray-700 text-neutral-light rounded hover:bg-gray-600 text-sm"
+                  onClick={clearSelection}
+                >
+                  Clear Selection
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

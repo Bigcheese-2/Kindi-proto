@@ -1,9 +1,18 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useData } from '@/app/contexts/DataContext';
+import { useSelectionSync } from '@/app/hooks/useSelectionSync';
 
 export default function NetworkGraphPanel() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { currentDataset, isLoading } = useData();
+  const { 
+    selectedEntityIds, 
+    selectEntity, 
+    isEntitySelected,
+    clearSelection 
+  } = useSelectionSync('graph');
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
@@ -31,17 +40,42 @@ export default function NetworkGraphPanel() {
       </div>
       
       <div className="flex-1 bg-primary flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-accent mb-4 flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full bg-primary"></div>
+        {isLoading ? (
+          <div className="text-neutral-light">Loading network data...</div>
+        ) : !currentDataset?.entities?.length ? (
+          <div className="text-neutral-light">No entity data available</div>
+        ) : (
+          <div className="w-full h-full relative">
+            {/* Placeholder for an actual graph visualization library */}
+            <div className="text-center">
+              <div className="flex flex-col items-center justify-center">
+                {currentDataset.entities.slice(0, 3).map((entity, index) => (
+                  <div key={entity.id} className="flex flex-col items-center my-2">
+                    <button 
+                      className={`w-12 h-12 rounded-full ${isEntitySelected(entity.id) ? 'bg-highlight' : 'bg-accent'} mb-2 flex items-center justify-center`}
+                      onClick={() => selectEntity(entity.id)}
+                    >
+                      <div className="w-4 h-4 rounded-full bg-primary"></div>
+                    </button>
+                    <span className="text-xs text-neutral-light">{entity.name}</span>
+                    {index < 2 && (
+                      <div className="w-0.5 h-8 bg-accent my-2"></div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="w-0.5 h-16 bg-accent"></div>
-            <div className="w-12 h-12 rounded-full bg-accent mt-4 flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full bg-primary"></div>
+            
+            <div className="absolute bottom-4 right-4">
+              <button 
+                className="px-3 py-1 bg-gray-700 text-neutral-light rounded hover:bg-gray-600"
+                onClick={clearSelection}
+              >
+                Clear Selection
+              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
