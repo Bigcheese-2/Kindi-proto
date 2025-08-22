@@ -56,3 +56,5 @@ export const transformForMap = (locations: GeoLocation[], entities: Entity[]): M
   };
 };
 
+
+
