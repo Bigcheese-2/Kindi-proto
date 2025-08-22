@@ -26,7 +26,7 @@ import { ExportService, ExportOptions, saveExportedContent } from '@/app/lib/exp
         throw new Error('Timeline reference is not available');
       }
       
-      const result = await exportService.exportTimeline(timelineRef, options);
+      const result = await exportService.exportTimeline(timelineRef as React.RefObject<HTMLElement>, options);
       
       // Save the exported content
       saveExportedContent(
