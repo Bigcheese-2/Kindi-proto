@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import FilterPanel from '../core/filters/FilterPanel';
 import { useUI } from '@/app/contexts/UIContext';
+import ExportDataButton from '../core/export/ExportDataButton';
+import ReportManagerButton from '../core/export/ReportManagerButton';
+import ExportSettingsButton from '../core/export/ExportSettingsButton';
 
 export default function ControlPanel() {
   const { controlPanelVisible, setControlPanelVisible } = useUI();
@@ -68,13 +71,29 @@ export default function ControlPanel() {
         {activeTab === 'filters' && <FilterPanel />}
         {activeTab === 'datasets' && (
           <div className="p-4">
-            <h2 className="text-lg font-secondary font-semibold text-neutral-light mb-4">Datasets</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-secondary font-semibold text-neutral-light">Datasets</h2>
+              <ExportDataButton 
+                className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+              />
+            </div>
             <p className="text-neutral-medium">Dataset selection will go here.</p>
           </div>
         )}
         {activeTab === 'settings' && (
           <div className="p-4">
-            <h2 className="text-lg font-secondary font-semibold text-neutral-light mb-4">Settings</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-secondary font-semibold text-neutral-light">Settings</h2>
+              <div className="flex space-x-2">
+                <ReportManagerButton 
+                  className="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600"
+                />
+                <ExportSettingsButton 
+                  className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+                  buttonText="Export"
+                />
+              </div>
+            </div>
             <p className="text-neutral-medium">Settings will go here.</p>
           </div>
         )}
