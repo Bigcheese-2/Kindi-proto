@@ -23,7 +23,9 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-force-graph": "^1.29.3",
+    "react-force-graph-2d": "^1.28.0",
     "react-leaflet": "^5.0.0",
+    "three": "^0.179.1",
     "vis-data": "^8.0.1",
     "vis-timeline": "^8.3.0"
   },
