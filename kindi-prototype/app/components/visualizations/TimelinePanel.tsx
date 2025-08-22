@@ -1,24 +1,50 @@
 "use client";
 
-import { useState, useEffect } from 'react';
 import { useData } from '@/app/contexts/DataContext';
 import { useSelectionSync } from '@/app/hooks/useSelectionSync';
+import { useState, useRef, useCallback } from 'react';
+import ExportButton from '../export/ExportButton';
+import { ExportService, ExportOptions, saveExportedContent } from '@/app/lib/export/exportService';
 
-export default function TimelinePanel() {
-  const [viewMode, setViewMode] = useState('real-time');
-  const { currentDataset, isLoading } = useData();
-  const { 
-    selectedEventIds, 
-    selectEvent, 
-    isEventSelected, 
-    clearSelection 
-  } = useSelectionSync('timeline');
+  
+  export default function TimelinePanel() {
+    const [viewMode, setViewMode] = useState('real-time');
+    const timelineRef = useRef<HTMLDivElement>(null);
+    const exportService = new ExportService();
+    const { currentDataset, isLoading } = useData();
+    const { 
+      selectedEventIds, 
+      selectEvent, 
+      isEventSelected, 
+      clearSelection 
+    } = useSelectionSync('timeline');
+  
+  // Handle export
+  const handleExport = useCallback(async (options: ExportOptions) => {
+    try {
+      if (!timelineRef.current) {
+        throw new Error('Timeline reference is not available');
+      }
+      
+      const result = await exportService.exportTimeline(timelineRef, options);
+      
+      // Save the exported content
+      saveExportedContent(
+        result,
+        options.filename || `timeline.${options.format}`
+      );
+    } catch (error) {
+      console.error('Error exporting timeline:', error);
+      alert('Failed to export timeline. Please try again.');
+    }
+  }, [exportService]);
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 className="text-neutral-light font-secondary font-semibold">Timeline Analysis</h2>
         <div className="flex space-x-2">
+          <ExportButton exportType="timeline" onExport={handleExport} />
           <button 
             className={`px-3 py-1 rounded text-sm ${viewMode === 'real-time' ? 'bg-accent text-white' : 'bg-gray-700 text-neutral-medium hover:bg-gray-600'}`}
             onClick={() => setViewMode('real-time')}

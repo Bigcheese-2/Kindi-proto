@@ -8,6 +8,9 @@
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/600.css';
 
+/* Import theme styles */
+@import './styles/themes.css';
+
 :root {
   /* Color Palette */
   --color-primary: #1A1E23;
@@ -133,4 +136,27 @@ code, pre {
 .risk-indicator-bar {
   height: 100%;
   background: linear-gradient(90deg, var(--color-success) 0%, var(--color-warning) 50%, var(--color-error) 100%);
+}
+
+/* Accessibility Styles */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.high-contrast :focus-visible {
+  outline: 3px solid white;
 }

@@ -6,55 +6,45 @@ import InspectorPanel from './InspectorPanel';
 import NetworkGraphPanel from '../visualizations/NetworkGraphPanel';
 import TimelinePanel from '../visualizations/TimelinePanel';
 import MapPanel from '../visualizations/MapPanel';
+import SkipLink from '../accessibility/SkipLink';
 import { UIProvider } from '@/app/contexts/UIContext';
 import { DataProvider } from '@/app/contexts/DataContext';
-import { SelectionProvider } from '@/app/contexts/SelectionContext';
-import { FilterProvider } from '@/app/contexts/FilterContext';
-import ControlPanel from './ControlPanel';
+import { AnnotationProvider } from '@/app/contexts/AnnotationContext';
+import { ThemeProvider } from '@/app/contexts/ThemeContext';
+import { KeyboardProvider } from '@/app/contexts/KeyboardContext';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <UIProvider>
-      <DataProvider>
-        <SelectionProvider>
-          <FilterProvider>
-            <div className="flex flex-col h-screen bg-primary text-neutral-light">
-              <AppHeader />
-              
-              <main className="flex-1 overflow-hidden relative">
-                <div className="flex h-full">
-                  {/* Left sidebar - Control Panel */}
-                  <div className="w-64 h-full p-2">
-                    <ControlPanel />
-                  </div>
-                  
-                  {/* Main content area */}
-                  <div className="flex-1 p-2">
-                    <div className="grid grid-cols-2 grid-rows-2 gap-4 h-full">
-                      <div className="col-span-1 row-span-1">
-                        <NetworkGraphPanel />
-                      </div>
-                      
-                      <div className="col-span-1 row-span-1 grid grid-rows-2 gap-4">
-                        <div className="row-span-1">
-                          <MapPanel />
-                        </div>
-                        <div className="row-span-1">
-                          <InspectorPanel />
-                        </div>
-                      </div>
-                      
-                      <div className="col-span-2 row-span-1">
-                        <TimelinePanel />
-                      </div>
+    <ThemeProvider>
+      <KeyboardProvider>
+        <UIProvider>
+          <DataProvider>
+            <AnnotationProvider>
+              <div className="flex flex-col h-screen bg-primary text-neutral-light">
+                <SkipLink />
+                <AppHeader />
+                
+                <main id="main-content" className="flex-1 overflow-hidden relative">
+                  <div className="grid grid-cols-2 grid-rows-2 gap-4 h-full p-4">
+                    <div className="">
+                      <NetworkGraphPanel />
+                      <TimelinePanel />
                     </div>
+                    
+                      <div className="">
+                        <MapPanel />
+                        <InspectorPanel />
+
+                    </div>
+                    
+              
                   </div>
-                </div>
-              </main>
-            </div>
-          </FilterProvider>
-        </SelectionProvider>
-      </DataProvider>
-    </UIProvider>
+                </main>
+              </div>
+            </AnnotationProvider>
+          </DataProvider>
+        </UIProvider>
+      </KeyboardProvider>
+    </ThemeProvider>
   );
 }
