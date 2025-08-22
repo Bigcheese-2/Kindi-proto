@@ -53,7 +53,9 @@ export const saveSearchToHistory = (query: string): SearchHistoryItem[] => {
   
   // Save to local storage
   try {
-    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updatedHistory));
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updatedHistory));
+    }
   } catch (error) {
     console.error('Error saving search history:', error);
   }
@@ -67,8 +69,11 @@ export const saveSearchToHistory = (query: string): SearchHistoryItem[] => {
  */
 export const getSearchHistory = (): SearchHistoryItem[] => {
   try {
-    const history = localStorage.getItem(SEARCH_HISTORY_KEY);
-    return history ? JSON.parse(history) : [];
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const history = localStorage.getItem(SEARCH_HISTORY_KEY);
+      return history ? JSON.parse(history) : [];
+    }
+    return [];
   } catch (error) {
     console.error('Error reading search history:', error);
     return [];
@@ -80,7 +85,9 @@ export const getSearchHistory = (): SearchHistoryItem[] => {
  */
 export const clearSearchHistory = (): void => {
   try {
-    localStorage.removeItem(SEARCH_HISTORY_KEY);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem(SEARCH_HISTORY_KEY);
+    }
   } catch (error) {
     console.error('Error clearing search history:', error);
   }
@@ -97,7 +104,9 @@ export const deleteSearchHistoryItem = (id: string): SearchHistoryItem[] => {
   
   // Save to local storage
   try {
-    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updatedHistory));
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updatedHistory));
+    }
   } catch (error) {
     console.error('Error saving search history:', error);
   }
