@@ -1,0 +1,22 @@
+
+> kindi-prototype@0.1.0 dev
+> npm run copy-data && next dev --turbopack
+
+
+> kindi-prototype@0.1.0 copy-data
+> node scripts/copy-data.js
+
+Copying data files to public directory...
+Copied: C:\Users\LENOVO\OneDrive\Documents\prompt-eng\assignment\Kindi-proto\kindi-prototype\data\datasets\cyber-threat-network.json -> C:\Users\LENOVO\OneDrive\Documents\prompt-eng\assignment\Kindi-proto\kindi-prototype\public\data\datasets\cyber-threat-network.json
+Copied: C:\Users\LENOVO\OneDrive\Documents\prompt-eng\assignment\Kindi-proto\kindi-prototype\data\datasets\operation-blackwater.json -> C:\Users\LENOVO\OneDrive\Documents\prompt-eng\assignment\Kindi-proto\kindi-prototype\public\data\datasets\operation-blackwater.json
+Copied: C:\Users\LENOVO\OneDrive\Documents\prompt-eng\assignment\Kindi-proto\kindi-prototype\data\index.json -> C:\Users\LENOVO\OneDrive\Documents\prompt-eng\assignment\Kindi-proto\kindi-prototype\public\data\index.json
+Data files copied successfully!
+ ⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+   ▲ Next.js 15.5.0 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://10.79.208.205:3001
+
+ ✓ Starting...
+ ✓ Ready in 14.4s
+[?25h
+^C

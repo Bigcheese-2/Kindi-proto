@@ -1,24 +1,33 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useData } from '@/app/contexts/DataContext';
-import { useSelectionSync } from '@/app/hooks/useSelectionSync';
+import { useSelection } from '@/app/contexts/SelectionContext';
+import ExportButton from '../core/export/ExportButton';
 
 export default function MapPanel() {
+  const mapRef = useRef<HTMLDivElement>(null);
   const [mapType, setMapType] = useState('satellite');
   const { currentDataset, isLoading } = useData();
   const { 
     selectedLocationIds, 
     selectLocation, 
-    isLocationSelected, 
     clearSelection 
-  } = useSelectionSync('map');
+  } = useSelection();
+  
+  const isLocationSelected = (locationId: string) => selectedLocationIds.includes(locationId);
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 className="text-neutral-light font-secondary font-semibold">Geographic View</h2>
         <div className="flex space-x-2">
+          <ExportButton
+            exportType="map"
+            elementRef={mapRef}
+            className="px-3 py-1 rounded text-sm bg-gray-700 text-neutral-medium hover:bg-gray-600"
+            buttonText="Export"
+          />
           <button 
             className={`px-3 py-1 rounded text-sm ${mapType === 'satellite' ? 'bg-accent text-white' : 'bg-gray-700 text-neutral-medium hover:bg-gray-600'}`}
             onClick={() => setMapType('satellite')}
@@ -34,7 +43,7 @@ export default function MapPanel() {
         </div>
       </div>
       
-      <div className="flex-1 bg-primary flex items-center justify-center p-4 relative">
+      <div ref={mapRef} className="flex-1 bg-primary flex items-center justify-center p-4 relative">
         {isLoading ? (
           <div className="text-neutral-light">Loading map data...</div>
         ) : !currentDataset?.locations?.length ? (

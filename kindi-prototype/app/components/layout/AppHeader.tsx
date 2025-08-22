@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import GlobalSearch from '../core/search/GlobalSearch';
+import AppearanceSettingsButton from '../core/theme/AppearanceSettingsButton';
+import AccessibilityButton from '../core/accessibility/AccessibilityButton';
+import KeyboardShortcutsButton from '../core/keyboard/KeyboardShortcutsButton';
 
 export default function AppHeader() {
   const [datasetName, setDatasetName] = useState("Operation Blackwater");
@@ -61,6 +64,34 @@ export default function AppHeader() {
         <div className="relative w-64">
           <GlobalSearch />
         </div>
+        
+        <AppearanceSettingsButton
+          className="bg-secondary p-2 rounded hover:bg-accent transition-colors"
+          buttonText={
+            <svg className="h-5 w-5 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          }
+        />
+        
+        <AccessibilityButton
+          className="bg-secondary p-2 rounded hover:bg-accent transition-colors"
+          buttonText={
+            <svg className="h-5 w-5 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          }
+        />
+        
+        <KeyboardShortcutsButton
+          className="bg-secondary p-2 rounded hover:bg-accent transition-colors"
+          buttonText={
+            <svg className="h-5 w-5 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          }
+        />
         
         <button className="bg-secondary p-2 rounded hover:bg-accent transition-colors">
           <svg className="h-5 w-5 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">

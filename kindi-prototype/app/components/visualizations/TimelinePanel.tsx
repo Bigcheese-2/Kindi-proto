@@ -1,24 +1,33 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useData } from '@/app/contexts/DataContext';
-import { useSelectionSync } from '@/app/hooks/useSelectionSync';
+import { useSelection } from '@/app/contexts/SelectionContext';
+import ExportButton from '../core/export/ExportButton';
 
 export default function TimelinePanel() {
+  const timelineRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState('real-time');
   const { currentDataset, isLoading } = useData();
   const { 
     selectedEventIds, 
     selectEvent, 
-    isEventSelected, 
     clearSelection 
-  } = useSelectionSync('timeline');
+  } = useSelection();
+  
+  const isEventSelected = (eventId: string) => selectedEventIds.includes(eventId);
   
   return (
     <div className="bg-secondary rounded-md shadow-md h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 className="text-neutral-light font-secondary font-semibold">Timeline Analysis</h2>
         <div className="flex space-x-2">
+          <ExportButton
+            exportType="timeline"
+            elementRef={timelineRef}
+            className="px-3 py-1 rounded text-sm bg-gray-700 text-neutral-medium hover:bg-gray-600"
+            buttonText="Export"
+          />
           <button 
             className={`px-3 py-1 rounded text-sm ${viewMode === 'real-time' ? 'bg-accent text-white' : 'bg-gray-700 text-neutral-medium hover:bg-gray-600'}`}
             onClick={() => setViewMode('real-time')}
@@ -44,7 +53,7 @@ export default function TimelinePanel() {
         </div>
       </div>
       
-      <div className="flex-1 bg-primary p-4 flex flex-col">
+      <div ref={timelineRef} className="flex-1 bg-primary p-4 flex flex-col">
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-neutral-light">Loading timeline data...</div>
