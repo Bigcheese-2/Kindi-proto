@@ -28,22 +28,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 
                 <main id="main-content" className="flex-1 overflow-hidden relative">
                   <div className="grid grid-cols-2 grid-rows-2 gap-4 h-full p-4">
-                    <div className="col-span-1 row-span-1">
+                    <div className="">
                       <NetworkGraphPanel />
-                    </div>
-                    
-                    <div className="col-span-1 row-span-1 grid grid-rows-2 gap-4">
-                      <div className="row-span-1">
-                        <MapPanel />
-                      </div>
-                      <div className="row-span-1">
-                        <InspectorPanel />
-                      </div>
-                    </div>
-                    
-                    <div className="col-span-2 row-span-1">
                       <TimelinePanel />
                     </div>
+                    
+                      <div className="">
+                        <MapPanel />
+                        <InspectorPanel />
+
+                    </div>
+                    
+              
                   </div>
                 </main>
               </div>
