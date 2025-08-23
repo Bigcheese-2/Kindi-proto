@@ -6,9 +6,9 @@ export type ViewType = 'default' | 'graph' | 'timeline' | 'map';
 
 export interface UIContextType {
   panelSizes: {
-    graphPanel: number; // Top Left panel size
-    timelinePanel: number; // Bottom panel size
-    mapPanel: number; // Top Right panel size
+    graphPanel: number; // Left panel (full height)
+    timelinePanel: number; // Bottom Right panel size
+    inspectorPanel: number; // Top Right panel size
   };
   setPanelSize: (panel: string, size: number) => void;
   inspectorVisible: boolean; // Right sidebar visibility
@@ -24,11 +24,11 @@ const UIContext = createContext<UIContextType | undefined>(undefined);
 export const UIProvider = ({ children }: { children: ReactNode }) => {
   const [panelSizes, setPanelSizes] = useState({
     graphPanel: 50, // Percentage of available space
-    timelinePanel: 30, // Percentage of available space
-    mapPanel: 50, // Percentage of available space
+    timelinePanel: 50, // Percentage of available space
+    inspectorPanel: 50, // Percentage of available space
   });
 
-  const [inspectorVisible, setInspectorVisible] = useState(false);
+  const [inspectorVisible, setInspectorVisible] = useState(false); // Collapsed by default per PRD
   const [controlPanelVisible, setControlPanelVisible] = useState(true);
   const [activeView, setActiveView] = useState<ViewType>('default');
 

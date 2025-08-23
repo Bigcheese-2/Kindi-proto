@@ -33,33 +33,34 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     
                     <AppHeader />
                     
-                    <main className="flex-1 overflow-hidden relative" id="main-content">
+                    <main className="flex-1 overflow-auto relative" id="main-content">
                       <div className="flex h-full">
                         {/* Left sidebar - Control Panel */}
-                        <div className="w-64 h-full p-2">
+                        <div className="w-64 h-full border-r border-secondary">
                           <ControlPanel />
                         </div>
                         
                         {/* Main content area */}
-                        <div className="flex-1 p-2">
-                          <div className="grid grid-cols-2 grid-rows-2 gap-4 h-full">
-                            <div className="col-span-1 row-span-1">
+                        <div className="flex-1 relative">
+                          <div className="grid grid-cols-3 grid-rows-2 gap-0 h-full">
+                            {/* Graph panel - top-left, largest (as per PRD) */}
+                            <div className="col-span-2 row-span-1 border-r border-secondary border-b border-secondary">
                               <GraphPanel />
                             </div>
                             
-                            <div className="col-span-1 row-span-1 grid grid-rows-2 gap-4">
-                              <div className="row-span-1">
-                                <MapPanel />
-                              </div>
-                              <div className="row-span-1">
-                                <InspectorPanel />
-                              </div>
+                            {/* Map panel - top-right (as per PRD) */}
+                            <div className="col-span-1 row-span-1 border-b border-secondary">
+                              <MapPanel />
                             </div>
                             
-                            <div className="col-span-2 row-span-1">
+                            {/* Timeline panel - bottom, spanning full width (as per PRD) */}
+                            <div className="col-span-3 row-span-1">
                               <TimelinePanel />
                             </div>
                           </div>
+                          
+                          {/* Inspector Panel - Right sidebar overlay (per PRD) */}
+                          <InspectorPanel />
                         </div>
                       </div>
                     </main>

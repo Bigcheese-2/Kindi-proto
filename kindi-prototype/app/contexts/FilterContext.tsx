@@ -109,6 +109,8 @@ import {
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
+  // Use client-side only features
+  const isClient = typeof window !== 'undefined';
   // Basic filtering state
   const [filters, setFilters] = useState<Filter[]>([]);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
@@ -121,9 +123,11 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
   
   // Load saved advanced filters on mount
   useEffect(() => {
-    const loadedFilters = getSavedFilters();
-    setAdvancedSavedFilters(loadedFilters);
-  }, []);
+    if (isClient) {
+      const loadedFilters = getSavedFilters();
+      setAdvancedSavedFilters(loadedFilters);
+    }
+  }, [isClient]);
   
   // Update history when advanced filter changes
   useEffect(() => {
@@ -137,7 +141,7 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
       setFilterHistory(newHistory);
       setHistoryPosition(newPosition);
     }
-  }, [advancedFilter]);
+  }, [advancedFilter, historyPosition, filterHistory]);
   
   // Generate a unique ID for each filter
   const generateId = () => {
@@ -241,15 +245,17 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
   
   const goBack = useCallback(() => {
     if (historyPosition > 0) {
-      setHistoryPosition(prev => prev - 1);
-      setAdvancedFilter(filterHistory[historyPosition - 1]);
+      const newPosition = historyPosition - 1;
+      setHistoryPosition(newPosition);
+      setAdvancedFilter(filterHistory[newPosition]);
     }
   }, [historyPosition, filterHistory]);
   
   const goForward = useCallback(() => {
     if (historyPosition < filterHistory.length - 1) {
-      setHistoryPosition(prev => prev + 1);
-      setAdvancedFilter(filterHistory[historyPosition + 1]);
+      const newPosition = historyPosition + 1;
+      setHistoryPosition(newPosition);
+      setAdvancedFilter(filterHistory[newPosition]);
     }
   }, [historyPosition, filterHistory]);
   

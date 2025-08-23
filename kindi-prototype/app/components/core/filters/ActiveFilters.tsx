@@ -25,11 +25,12 @@ function FilterBadge({ filter, onRemove }: FilterBadgeProps) {
   };
   
   return (
-    <div className="filter-badge inline-flex items-center bg-gray-700 rounded-full px-3 py-1 mr-2 mb-2">
+    <div className="filter-badge inline-flex items-center bg-primary border border-secondary rounded-full px-3 py-1 mr-2 mb-2">
       <span className="text-xs text-neutral-light mr-2">{getFilterDescription()}</span>
       <button 
         className="text-neutral-medium hover:text-neutral-light" 
         onClick={onRemove}
+        aria-label="Remove filter"
       >
         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -49,7 +50,7 @@ export default function ActiveFilters() {
   return (
     <div className="active-filters mb-4">
       <div className="filters-header flex justify-between items-center mb-2">
-        <h3 className="text-sm font-medium text-neutral-light">Active Filters</h3>
+        <h3 className="text-xs font-medium text-neutral-light">Active Filters</h3>
         <button 
           className="text-xs text-neutral-medium hover:text-neutral-light"
           onClick={clearFilters}

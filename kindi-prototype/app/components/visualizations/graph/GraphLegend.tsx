@@ -37,52 +37,38 @@ export const GraphLegend: React.FC<GraphLegendProps> = ({ className = '' }) => {
   const entityTypes = Object.values(EntityType);
 
   return (
-    <div className={`bg-white rounded-lg shadow-md p-4 ${className}`}>
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">Entity Types</h3>
+    <div className={`bg-secondary rounded-md p-3 ${className}`}>
+      <h3 className="text-xs font-medium text-neutral-light mb-2">Entity Types</h3>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {entityTypes.map(entityType => (
           <div key={entityType} className="flex items-center space-x-2">
             <div
-              className="w-4 h-4 rounded-full"
+              className="w-3 h-3 rounded-full"
               style={{ backgroundColor: getColorForEntityType(entityType) }}
             />
-            <span className="text-sm text-gray-600">{getEntityTypeLabel(entityType)}</span>
+            <span className="text-xs text-neutral-light">{getEntityTypeLabel(entityType)}</span>
           </div>
         ))}
       </div>
 
       {/* Relationship Legend */}
-      <h3 className="text-sm font-semibold text-gray-700 mb-3 mt-6">Relationships</h3>
+      <h3 className="text-xs font-medium text-neutral-light mb-2 mt-4">Relationships</h3>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-0.5 bg-gray-600"></div>
-          <span className="text-sm text-gray-600">Directed</span>
+          <div className="w-6 h-0.5 bg-neutral-light"></div>
+          <span className="text-xs text-neutral-light">Directed</span>
         </div>
         <div className="flex items-center space-x-2">
           <div
-            className="w-6 h-0.5 bg-gray-600"
+            className="w-6 h-0.5"
             style={{
-              borderTop: '1px dashed #666',
+              borderTop: '1px dashed #A0AEC0',
               backgroundColor: 'transparent',
             }}
           ></div>
-          <span className="text-sm text-gray-600">Undirected</span>
-        </div>
-      </div>
-
-      {/* Selection Legend */}
-      <h3 className="text-sm font-semibold text-gray-700 mb-3 mt-6">Selection</h3>
-
-      <div className="space-y-2">
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full bg-red-400 border-2 border-red-500"></div>
-          <span className="text-sm text-gray-600">Selected</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
-          <span className="text-sm text-gray-600">Highlighted</span>
+          <span className="text-xs text-neutral-light">Undirected</span>
         </div>
       </div>
     </div>

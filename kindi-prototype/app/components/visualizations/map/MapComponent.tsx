@@ -3,17 +3,25 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { GeoLocation, Entity } from '../../../models/data-types';
+import 'leaflet/dist/leaflet.css';
 
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), {
   ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full w-full">
+      <div className="text-center">
+        <div className="w-16 h-16 rounded-full border-t-2 border-b-2 border-accent animate-spin mb-2"></div>
+        <p className="text-neutral-light text-sm">Loading map...</p>
+      </div>
+    </div>
+  )
 });
 
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const ZoomControl = dynamic(() => import('react-leaflet').then(mod => mod.ZoomControl), { ssr: false });
 
 interface MarkerData {
   id: string;
@@ -32,6 +40,7 @@ interface MapComponentProps {
   selectedLocationIds?: string[];
   onLocationClick?: (locationId: string) => void;
   className?: string;
+  mapType?: 'satellite' | 'streets';
 }
 
 export const MapComponent: React.FC<MapComponentProps> = ({
@@ -40,6 +49,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   selectedLocationIds = [],
   onLocationClick,
   className = '',
+  mapType = 'streets',
 }) => {
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [isClient, setIsClient] = useState(false);
@@ -47,6 +57,18 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   // Default map settings
   const defaultCenter: [number, number] = [40.7128, -74.006]; // New York City
   const defaultZoom = 10;
+
+  // Map tile URLs based on mapType
+  const mapTiles = {
+    streets: {
+      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    },
+    satellite: {
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }
+  };
 
   // Set client-side flag
   useEffect(() => {
@@ -89,18 +111,10 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   // Show loading/placeholder for SSR
   if (!isClient) {
     return (
-      <div className={`flex items-center justify-center h-full bg-gray-100 ${className}`}>
+      <div className={`flex items-center justify-center h-full bg-primary ${className}`}>
         <div className="text-center">
-          <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-          <p className="text-gray-600">Loading map...</p>
+          <div className="w-16 h-16 rounded-full border-t-2 border-b-2 border-accent animate-spin mb-2"></div>
+          <p className="text-neutral-light text-sm">Interactive Map Loading...</p>
         </div>
       </div>
     );
@@ -111,13 +125,15 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       <MapContainer
         center={defaultCenter}
         zoom={defaultZoom}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100%', width: '100%', background: '#1A1E23' }}
         className="z-0"
+        zoomControl={false}
+        attributionControl={false}
       >
-        {/* Default tile layer */}
+        {/* Selected tile layer based on mapType */}
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url={mapTiles[mapType].url}
+          attribution={mapTiles[mapType].attribution}
         />
 
         {/* Render markers */}
@@ -129,13 +145,13 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               click: () => handleMarkerClick(marker.id),
             }}
           >
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-semibold text-sm">{marker.name}</h3>
-                <p className="text-xs text-gray-600 mt-1">Type: {marker.type}</p>
-                {marker.address && <p className="text-xs text-gray-600">{marker.address}</p>}
+            <Popup className="custom-popup">
+              <div className="p-2 bg-primary text-neutral-light">
+                <h3 className="font-medium text-sm">{marker.name}</h3>
+                <p className="text-xs text-neutral-medium mt-1">Type: {marker.type}</p>
+                {marker.address && <p className="text-xs text-neutral-medium">{marker.address}</p>}
                 {marker.entities.length > 0 && (
-                  <p className="text-xs text-blue-600 mt-1">
+                  <p className="text-xs text-accent mt-1">
                     {marker.entities.length} associated entities
                   </p>
                 )}
@@ -143,9 +159,15 @@ export const MapComponent: React.FC<MapComponentProps> = ({
             </Popup>
           </Marker>
         ))}
+
+        {/* Custom zoom control position */}
+        <ZoomControl position="topleft" />
       </MapContainer>
 
-      {/* Add map controls here later */}
+      {/* Map attribution with custom styling */}
+      <div className="absolute bottom-1 right-1 text-xs text-neutral-medium z-10 bg-primary bg-opacity-50 px-1 rounded">
+        {mapType === 'satellite' ? 'Satellite imagery © Esri' : 'Map data © OpenStreetMap, CARTO'}
+      </div>
     </div>
   );
 };

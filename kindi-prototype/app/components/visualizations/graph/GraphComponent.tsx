@@ -5,7 +5,17 @@ import dynamic from 'next/dynamic';
 import { Entity, Relationship, EntityType } from '../../../models/data-types';
 
 // Dynamically import ForceGraph2D to avoid SSR issues
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
+const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { 
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full w-full">
+      <div className="text-center">
+        <div className="w-16 h-16 rounded-full border-t-2 border-b-2 border-accent animate-spin mb-2"></div>
+        <p className="text-neutral-light text-sm">Loading graph visualization...</p>
+      </div>
+    </div>
+  )
+});
 
 interface GraphNode {
   id: string;
@@ -43,12 +53,12 @@ interface GraphComponentProps {
 // Color mapping for entity types
 const getColorForEntityType = (entityType: EntityType): string => {
   const colorMap: Record<EntityType, string> = {
-    [EntityType.PERSON]: '#4285f4',
-    [EntityType.ORGANIZATION]: '#34a853',
-    [EntityType.LOCATION]: '#fbbc05',
-    [EntityType.OBJECT]: '#ea4335',
-    [EntityType.DIGITAL]: '#9c27b0',
-    [EntityType.CUSTOM]: '#607d8b',
+    [EntityType.PERSON]: '#4285f4', // Blue
+    [EntityType.ORGANIZATION]: '#34a853', // Green
+    [EntityType.LOCATION]: '#fbbc05', // Yellow
+    [EntityType.OBJECT]: '#ea4335', // Red
+    [EntityType.DIGITAL]: '#9c27b0', // Purple
+    [EntityType.CUSTOM]: '#607d8b', // Gray
   };
   return colorMap[entityType] || colorMap[EntityType.CUSTOM];
 };
@@ -64,6 +74,34 @@ export const GraphComponent: React.FC<GraphComponentProps> = ({
   const fgRef = useRef<any>();
   const [highlightNodes, setHighlightNodes] = useState(new Set());
   const [highlightLinks, setHighlightLinks] = useState(new Set());
+  const [isClientSide, setIsClientSide] = useState(false);
+  
+  // This effect ensures we only render the graph on the client side
+  useEffect(() => {
+    setIsClientSide(true);
+  }, []);
+  
+  // Handle window resize to ensure the graph updates its dimensions
+  useEffect(() => {
+    if (!fgRef.current) return;
+    
+    const handleResize = () => {
+      if (fgRef.current) {
+        // Force the graph to recalculate its dimensions
+        fgRef.current.size([
+          fgRef.current.width,
+          fgRef.current.height
+        ]);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Initial call to set dimensions
+    setTimeout(handleResize, 100);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isClientSide]);
 
   // Transform data to graph format
   const graphData = useMemo((): GraphData => {
@@ -141,7 +179,7 @@ export const GraphComponent: React.FC<GraphComponentProps> = ({
       const isHighlighted = highlightNodes.has(node.id);
       const isSelected = selectedEntityIds.includes(node.id);
 
-      const nodeSize = node.val * 4 + (isSelected ? 4 : 0);
+      const nodeSize = node.val * 5 + (isSelected ? 4 : 0); // Larger nodes
       const nodeColor = isSelected ? '#ff6b6b' : node.color;
 
       // Draw node circle
@@ -159,11 +197,11 @@ export const GraphComponent: React.FC<GraphComponentProps> = ({
 
       // Draw label
       const label = node.name;
-      const fontSize = Math.max(nodeSize / 2, 8);
+      const fontSize = Math.max(nodeSize / 1.5, 10); // Larger font
       ctx.font = `${fontSize}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#333';
+      ctx.fillStyle = '#E1E5EB'; // Light text color for visibility
       ctx.fillText(label, node.x || 0, (node.y || 0) + nodeSize + fontSize);
     },
     [highlightNodes, selectedEntityIds]
@@ -173,8 +211,8 @@ export const GraphComponent: React.FC<GraphComponentProps> = ({
   const linkCanvasObject = useCallback(
     (link: GraphLink, ctx: CanvasRenderingContext2D) => {
       const isHighlighted = highlightLinks.has(link);
-      const linkWidth = isHighlighted ? 4 : Math.max(1, link.strength);
-      const linkColor = isHighlighted ? '#ff6b6b' : '#999';
+      const linkWidth = isHighlighted ? 3 : Math.max(1, link.strength);
+      const linkColor = isHighlighted ? '#4299e1' : 'rgba(160, 174, 192, 0.6)'; // More subtle lines
 
       ctx.strokeStyle = linkColor;
       ctx.lineWidth = linkWidth;
@@ -187,15 +225,17 @@ export const GraphComponent: React.FC<GraphComponentProps> = ({
 
       // Draw arrow for directed relationships
       if (link.directed) {
-        const arrowLength = 10;
+        const arrowLength = 8;
         const arrowAngle = Math.PI / 6;
 
         const dx = (link.target.x || 0) - (link.source.x || 0);
         const dy = (link.target.y || 0) - (link.source.y || 0);
         const angle = Math.atan2(dy, dx);
 
-        const targetX = link.target.x || 0;
-        const targetY = link.target.y || 0;
+        // Calculate position slightly before target node to avoid overlap
+        const nodeRadius = 5; // Approximate node radius
+        const targetX = (link.target.x || 0) - Math.cos(angle) * nodeRadius;
+        const targetY = (link.target.y || 0) - Math.sin(angle) * nodeRadius;
 
         ctx.beginPath();
         ctx.moveTo(targetX, targetY);
@@ -216,20 +256,20 @@ export const GraphComponent: React.FC<GraphComponentProps> = ({
     [highlightLinks]
   );
 
-  // Show loading state for SSR
-  if (typeof window === 'undefined') {
+  // Show loading state for SSR or before client-side hydration is complete
+  if (typeof window === 'undefined' || !isClientSide) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading graph...</p>
+          <div className="w-16 h-16 rounded-full border-t-2 border-b-2 border-accent animate-spin mb-2"></div>
+          <p className="text-neutral-light text-sm">Initializing graph...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`relative h-full ${className}`}>
+    <div className={`relative h-full w-full ${className}`}>
       <ForceGraph2D
         ref={fgRef}
         graphData={graphData}
@@ -253,7 +293,9 @@ export const GraphComponent: React.FC<GraphComponentProps> = ({
         enableNodeDrag={true}
         enableZoomInteraction={true}
         enablePanInteraction={true}
-        backgroundColor="#f8f9fa"
+        backgroundColor="#1A1E23" // Dark background to match the design
+        width={undefined} // Let it fill the container width
+        height={undefined} // Let it fill the container height
       />
     </div>
   );

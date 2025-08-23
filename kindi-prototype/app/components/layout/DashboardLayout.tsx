@@ -5,6 +5,7 @@ import ControlPanel from './ControlPanel';
 import GraphPanel from '../visualizations/GraphPanel';
 import TimelinePanel from '../visualizations/TimelinePanel';
 import MapPanel from '../visualizations/MapPanel';
+import InspectorPanel from './InspectorPanel';
 import { useEffect, useState } from 'react';
 import ResizablePanel from '../core/ResizablePanel';
 import '../core/resizable.css';
@@ -45,67 +46,49 @@ export default function DashboardLayout() {
   useEffect(() => {
     const storedSizes = JSON.parse(sessionStorage.getItem('panelSizes') || '{}');
     if (storedSizes.graphPanel) setPanelSize('graphPanel', storedSizes.graphPanel);
-    if (storedSizes.mapPanel) setPanelSize('mapPanel', storedSizes.mapPanel);
     if (storedSizes.timelinePanel) setPanelSize('timelinePanel', storedSizes.timelinePanel);
+    if (storedSizes.inspectorPanel) setPanelSize('inspectorPanel', storedSizes.inspectorPanel);
   }, [setPanelSize]);
 
   return (
     <div className="flex h-full">
-      {controlPanelVisible && <ControlPanel />}
+      {controlPanelVisible && (
+        <div className="w-64 h-full border-r border-secondary">
+          <ControlPanel />
+        </div>
+      )}
       
-      <div className="flex-1 p-4 overflow-hidden">
+      <div className="flex-1 overflow-hidden">
         {isMobile ? (
           // Mobile layout - stack panels vertically
-          <div className="flex flex-col gap-4 h-full overflow-y-auto">
-            <div className="h-[calc(33vh-2rem)]">
+          <div className="flex flex-col h-full overflow-y-auto">
+            <div className="h-[calc(50vh-2rem)]">
               <GraphPanel />
             </div>
-            <div className="h-[calc(33vh-2rem)]">
-              <MapPanel />
+            <div className="h-[calc(25vh-2rem)] border-t border-secondary">
+              <InspectorPanel />
             </div>
-            <div className="h-[calc(33vh-2rem)]">
+            <div className="h-[calc(25vh-2rem)] border-t border-secondary">
               <TimelinePanel />
             </div>
           </div>
         ) : (
-          // Desktop layout - grid layout with resizable panels
-          <div className="grid grid-cols-2 grid-rows-2 gap-4 h-full">
-            <ResizablePanel
-              id="graphPanel"
-              initialSize={panelSizes.graphPanel}
-              minSize={30}
-              maxSize={70}
-              direction="vertical"
-              onResize={handlePanelResize}
-              className="col-span-1 row-span-1"
-            >
+          // Desktop layout - 2x2 grid with left side taking 60%
+          <div className="grid grid-cols-5 grid-rows-2 h-full">
+            {/* Network Graph - takes 60% width (3/5), full height */}
+            <div className="col-span-3 row-span-2 border-r border-secondary">
               <GraphPanel />
-            </ResizablePanel>
+            </div>
             
-            <ResizablePanel
-              id="mapPanel"
-              initialSize={panelSizes.mapPanel}
-              minSize={30}
-              maxSize={70}
-              direction="vertical"
-              onResize={handlePanelResize}
-              className="col-span-1 row-span-1"
-            >
+            {/* Geographic View - takes 40% width (2/5), 50% height */}
+            <div className="col-span-2 row-span-1 border-b border-secondary">
               <MapPanel />
-            </ResizablePanel>
+            </div>
             
-            <ResizablePanel
-              id="timelinePanel"
-              initialSize={100 - Math.max(panelSizes.graphPanel, panelSizes.mapPanel)}
-              minSize={20}
-              maxSize={50}
-              direction="vertical"
-              onResize={handlePanelResize}
-              resizeHandlePosition="start"
-              className="col-span-2 row-span-1"
-            >
+            {/* Timeline Analysis - takes 40% width (2/5), 50% height */}
+            <div className="col-span-2 row-span-1">
               <TimelinePanel />
-            </ResizablePanel>
+            </div>
           </div>
         )}
       </div>

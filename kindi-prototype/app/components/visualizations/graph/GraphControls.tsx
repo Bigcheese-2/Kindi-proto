@@ -18,14 +18,14 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`flex flex-col space-y-2 bg-white rounded-lg shadow-md p-2 ${className}`}>
+    <div className={`flex flex-col space-y-1 bg-secondary rounded-md p-1 ${className}`}>
       {/* Zoom In */}
       <button
         onClick={onZoomIn}
-        className="p-2 rounded hover:bg-gray-100 transition-colors"
+        className="p-1 hover:bg-primary rounded"
         title="Zoom In"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-4 w-4 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -38,10 +38,10 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
       {/* Zoom Out */}
       <button
         onClick={onZoomOut}
-        className="p-2 rounded hover:bg-gray-100 transition-colors"
+        className="p-1 hover:bg-primary rounded"
         title="Zoom Out"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-4 w-4 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
         </svg>
       </button>
@@ -49,10 +49,10 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
       {/* Fit to View */}
       <button
         onClick={onFitToView}
-        className="p-2 rounded hover:bg-gray-100 transition-colors"
+        className="p-1 hover:bg-primary rounded"
         title="Fit to View"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-4 w-4 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -65,10 +65,10 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
       {/* Reset View */}
       <button
         onClick={onResetView}
-        className="p-2 rounded hover:bg-gray-100 transition-colors"
+        className="p-1 hover:bg-primary rounded"
         title="Reset View"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-4 w-4 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

@@ -19,6 +19,13 @@ module.exports = {
           medium: '#C4C9D4',
           light: '#E1E5EB',
         },
+        'background-primary': 'var(--background-primary)',
+        'background-secondary': 'var(--background-secondary)',
+        'background-tertiary': 'var(--background-tertiary)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-tertiary': 'var(--text-tertiary)',
+        'border-color': 'var(--border-color)',
       },
       fontFamily: {
         primary: ['Inter', 'sans-serif'],

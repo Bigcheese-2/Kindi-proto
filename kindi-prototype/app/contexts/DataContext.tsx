@@ -58,12 +58,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // Load the previously selected dataset from session storage on mount
   useEffect(() => {
     const loadPreviousDataset = async () => {
-      const previousDatasetId = sessionStorage.getItem('selectedDatasetId');
-      if (previousDatasetId && availableDatasets.length > 0) {
-        await loadDataset(previousDatasetId);
-      } else if (availableDatasets.length > 0) {
-        // Load the first dataset by default
-        await loadDataset(availableDatasets[0].id);
+      try {
+        setIsLoading(true);
+        const previousDatasetId = sessionStorage.getItem('selectedDatasetId');
+        if (previousDatasetId && availableDatasets.length > 0) {
+          await loadDataset(previousDatasetId);
+        } else if (availableDatasets.length > 0) {
+          // Load the first dataset by default
+          await loadDataset(availableDatasets[0].id);
+        }
+      } catch (err) {
+        console.error('Error loading previous dataset:', err);
+        setError(err instanceof Error ? err : new Error('Failed to load previous dataset'));
+      } finally {
+        setIsLoading(false);
       }
     };
 
