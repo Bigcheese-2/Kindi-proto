@@ -106,7 +106,7 @@ export default function GlobalSearch() {
       />
       
       {showResults && (query || isLoading) && (
-        <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-gray-800 rounded-md shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-secondary border border-border-color rounded-md shadow-lg z-10">
           <SearchResults
             results={results}
             onSelectResult={handleSelectResult}
@@ -116,7 +116,7 @@ export default function GlobalSearch() {
       )}
       
       {!showResults && history.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-gray-800 rounded-md shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-secondary border border-border-color rounded-md shadow-lg z-10">
           <SearchHistory
             history={history}
             onSelectQuery={handleSearch}

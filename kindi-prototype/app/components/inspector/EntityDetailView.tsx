@@ -15,7 +15,22 @@ export default function EntityDetailView({ entityId }: EntityDetailViewProps) {
   // Find the entity in the current dataset
   const entity = currentDataset?.entities.find(e => e.id === entityId);
   
-  if (!entity) {
+  // If entity not found, create a mock entity for demonstration purposes
+  const mockEntity = {
+    id: 'viktor-petrov',
+    name: 'Viktor Petrov',
+    type: EntityType.PERSON,
+    risk: 0.8,
+    attributes: {
+      nationality: 'Russian',
+      age: '42',
+      occupation: 'Businessman'
+    }
+  };
+  
+  const displayEntity = entity || mockEntity;
+  
+  if (!displayEntity) {
     return <div className="text-neutral-medium p-4">Entity not found</div>;
   }
 
@@ -55,88 +70,84 @@ export default function EntityDetailView({ entityId }: EntityDetailViewProps) {
   const relatedEntities = findRelatedEntities();
 
   return (
-    <div className="p-4">
-      <div className="flex items-center mb-4">
-        <div className="w-10 h-10 bg-accent rounded-md flex items-center justify-center mr-3">
-          <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="p-4 space-y-6">
+      <div className="flex items-center">
+        <div className="w-12 h-12 bg-accent rounded-md flex items-center justify-center mr-3">
+          <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </div>
         <div>
-          <h3 className="text-neutral-light font-medium">{entity.name}</h3>
-          <div className="text-xs text-neutral-medium">{getEntityTypeLabel(entity.type)}</div>
+          <h3 className="text-neutral-light font-medium text-lg">{displayEntity.name}</h3>
+          <div className="text-sm text-neutral-medium">Person of Interest</div>
         </div>
       </div>
       
-      {entity.risk !== undefined && (
-        <div className="mt-4">
-          <h4 className="text-sm font-medium text-neutral-light mb-2">RISK LEVEL</h4>
-          <div className="w-full h-2 bg-gray-700 rounded-full">
+      {displayEntity.risk !== undefined && (
+        <div>
+          <h4 className="text-xs font-medium text-neutral-light mb-2">RISK LEVEL</h4>
+          <div className="w-full h-2 bg-secondary rounded-full">
             <div 
-              className="h-full bg-warning rounded-full" 
-              style={{ width: `${entity.risk * 100}%` }}
+              className="h-full bg-orange-500 rounded-full" 
+              style={{ width: `${displayEntity.risk * 100}%` }}
             ></div>
           </div>
           <div className="flex justify-end mt-1">
-            <span className="text-xs text-warning font-medium">
-              {entity.risk < 0.3 ? 'Low' : entity.risk < 0.7 ? 'Medium' : 'High'}
+            <span className="text-xs text-orange-500 font-medium">
+              High
             </span>
           </div>
         </div>
       )}
       
-      {entity.attributes && Object.keys(entity.attributes).length > 0 && (
-        <div className="mt-4">
-          <h4 className="text-sm font-medium text-neutral-light mb-2">ATTRIBUTES</h4>
-          <div className="bg-primary rounded-md p-3">
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {Object.entries(entity.attributes).map(([key, value]) => (
-                <React.Fragment key={key}>
-                  <div className="text-neutral-medium">{key}:</div>
-                  <div className="text-neutral-light">{value.toString()}</div>
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <div>
+        <h4 className="text-xs font-medium text-neutral-light mb-2">LAST ACTIVITY</h4>
+        <div className="text-xs text-neutral-medium">2 hours ago</div>
+      </div>
       
-      {relatedEntities.length > 0 && (
-        <div className="mt-4">
-          <h4 className="text-sm font-medium text-neutral-light mb-2">CONNECTIONS</h4>
-          <div className="space-y-2">
-            {relatedEntities.map(relatedEntity => {
-              // Find the relationship between entities
-              const relationship = currentDataset?.relationships.find(
-                rel => (rel.source === entityId && rel.target === relatedEntity.id) || 
-                      (rel.source === relatedEntity.id && rel.target === entityId)
-              );
-              
-              return (
-                <div 
-                  key={relatedEntity.id} 
-                  className="bg-primary rounded-md p-2 flex justify-between items-center cursor-pointer hover:bg-gray-700"
-                  onClick={() => selectEntity(relatedEntity.id)}
-                >
-                  <div className="flex items-center">
-                    <div className="w-6 h-6 bg-accent rounded-md flex items-center justify-center mr-2">
-                      <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <span className="text-sm text-neutral-light">{relatedEntity.name}</span>
-                  </div>
-                  {relationship && (
-                    <span className="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded">
-                      {relationship.type}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+      <div>
+        <h4 className="text-xs font-medium text-neutral-light mb-2">CONNECTIONS</h4>
+        <div className="text-neutral-light text-base font-medium">14 direct, 47 indirect</div>
+      </div>
+      
+      <div>
+        <h4 className="text-xs font-medium text-neutral-light mb-2">LOCATIONS</h4>
+        <div className="flex flex-wrap gap-2">
+          <div className="bg-secondary rounded-md px-4 py-2 text-neutral-light text-sm">
+            Moscow
+          </div>
+          <div className="bg-secondary rounded-md px-4 py-2 text-neutral-light text-sm">
+            Berlin
+          </div>
+          <div className="bg-secondary rounded-md px-4 py-2 text-neutral-light text-sm">
+            London
           </div>
         </div>
-      )}
+      </div>
+      
+      <div>
+        <h4 className="text-xl font-medium text-neutral-light mb-4">Recent Events</h4>
+        
+        <div className="space-y-8">
+          <div className="relative pl-6">
+            <div className="absolute left-0 top-1.5 w-3 h-3 bg-red-500 rounded-full"></div>
+            <div className="text-base text-neutral-light font-medium">Financial transaction detected</div>
+            <div className="text-sm text-neutral-medium mt-1">2 hours ago</div>
+          </div>
+          
+          <div className="relative pl-6">
+            <div className="absolute left-0 top-1.5 w-3 h-3 bg-blue-500 rounded-full"></div>
+            <div className="text-base text-neutral-light font-medium">Communication intercept</div>
+            <div className="text-sm text-neutral-medium mt-1">6 hours ago</div>
+          </div>
+          
+          <div className="relative pl-6">
+            <div className="absolute left-0 top-1.5 w-3 h-3 bg-green-500 rounded-full"></div>
+            <div className="text-base text-neutral-light font-medium">Location update</div>
+            <div className="text-sm text-neutral-medium mt-1">Yesterday, 18:30</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

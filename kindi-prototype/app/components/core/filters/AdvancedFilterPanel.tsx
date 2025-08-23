@@ -57,9 +57,9 @@ const AdvancedFilterPanel: React.FC = () => {
   
   return (
     <div className="advanced-filter-panel">
-      <div className="filter-panel-header flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Advanced Filters</h2>
-        <div className="filter-actions flex space-x-2">
+      <div className="filter-panel-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
+        <h2 className="text-xl font-semibold text-text-primary">Advanced Filters</h2>
+        <div className="filter-actions flex flex-wrap gap-2">
           <FilterHistoryControls 
             canGoBack={historyPosition > 0}
             canGoForward={historyPosition < filterHistory.length - 1}
@@ -68,24 +68,29 @@ const AdvancedFilterPanel: React.FC = () => {
           />
           
           <button
-            className="save-filter-button px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+            className="save-filter-button px-3 py-1 bg-success text-white rounded hover:opacity-90 text-sm"
             onClick={() => setIsDialogOpen(true)}
             disabled={!advancedFilter}
+            aria-label="Save current filter"
+            aria-disabled={!advancedFilter}
           >
             Save Filter
           </button>
           
           <button
-            className="export-filter-button px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+            className="export-filter-button px-3 py-1 bg-accent text-white rounded hover:opacity-90 text-sm"
             onClick={handleExport}
             disabled={!advancedFilter}
+            aria-label="Export current filter"
+            aria-disabled={!advancedFilter}
           >
             Export
           </button>
           
           <button
-            className="import-filter-button px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm"
+            className="import-filter-button px-3 py-1 bg-purple-500 text-white rounded hover:opacity-90 text-sm"
             onClick={() => setImportDialogOpen(true)}
+            aria-label="Import filter"
           >
             Import
           </button>
@@ -112,28 +117,28 @@ const AdvancedFilterPanel: React.FC = () => {
       
       {/* Import Dialog */}
       {importDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h3 className="text-lg font-medium mb-4">Import Filter</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="import-dialog-title">
+          <div className="bg-background-secondary p-4 sm:p-6 rounded-lg w-full max-w-md border border-border-color shadow-md">
+            <h3 id="import-dialog-title" className="text-lg font-medium mb-4 text-text-primary">Import Filter</h3>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-text-primary">
                 Paste filter JSON
               </label>
               <textarea
                 value={importText}
                 onChange={e => setImportText(e.target.value)}
-                className="w-full border rounded p-2 h-40"
+                className="w-full border border-border-color rounded p-2 h-40 bg-background-tertiary text-text-primary"
                 placeholder="Paste JSON here..."
               />
               {importError && (
-                <p className="text-red-500 text-sm mt-1">{importError}</p>
+                <p className="text-error text-sm mt-1">{importError}</p>
               )}
             </div>
             
             <div className="flex justify-end space-x-2">
               <button
-                className="px-4 py-2 border rounded hover:bg-gray-100"
+                className="px-4 py-2 border border-border-color rounded bg-background-tertiary text-text-primary hover:bg-opacity-80"
                 onClick={() => {
                   setImportDialogOpen(false);
                   setImportError(null);
@@ -143,7 +148,7 @@ const AdvancedFilterPanel: React.FC = () => {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="px-4 py-2 bg-accent text-white rounded hover:opacity-90"
                 onClick={handleImport}
                 disabled={!importText.trim()}
               >

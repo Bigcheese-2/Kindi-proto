@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
-import { Entity, Event, GeoLocation, Dataset } from '@/app/models/data-types';
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
+import { Entity, Event, GeoLocation, Dataset, EntityType } from '@/app/models/data-types';
 import { useData } from './DataContext';
 
 // Visualization types
@@ -111,6 +111,20 @@ export const SelectionProvider = ({ children }: { children: ReactNode }) => {
     setSelectedEventIds(relatedEvents);
     setSelectedLocationIds(relatedLocations);
   }, [findRelatedEvents, findRelatedLocations]);
+  
+  // Select initial entity when data is loaded
+  useEffect(() => {
+    if (currentDataset?.entities?.length && selectedEntityIds.length === 0) {
+      // Find a person entity to select by default (Viktor Petrov)
+      const defaultEntity = currentDataset.entities.find(entity => 
+        entity.name === "Viktor Petrov" || entity.type === EntityType.PERSON
+      );
+      
+      if (defaultEntity) {
+        selectEntity(defaultEntity.id);
+      }
+    }
+  }, [currentDataset, selectedEntityIds.length, selectEntity]);
 
   const selectEvent = useCallback((id: string, exclusive = true, source?: VisualizationType) => {
     setSelectedEventIds(prev => exclusive ? [id] : [...prev, id]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelection } from '@/app/contexts/SelectionContext';
 import { useUI } from '@/app/contexts/UIContext';
 import EntityDetailView from '../inspector/EntityDetailView';
@@ -21,6 +21,16 @@ export default function InspectorPanel() {
   } = useSelection();
   const [activeTab, setActiveTab] = useState<'details' | 'annotations'>('details');
   const [isCreatingAnnotation, setIsCreatingAnnotation] = useState<boolean>(false);
+  
+  // Check if there's any selection
+  const hasSelection = selectedEntityIds.length > 0 || selectedEventIds.length > 0 || selectedLocationIds.length > 0;
+  
+  // Auto-open Inspector when item is selected (PRD requirement)
+  useEffect(() => {
+    if (hasSelection) {
+      setInspectorVisible(true);
+    }
+  }, [hasSelection, setInspectorVisible]);
   
   // Determine which view to show based on selection
   const getSelectedView = () => {
@@ -56,42 +66,40 @@ export default function InspectorPanel() {
     return 'Inspector';
   };
 
-  if (!inspectorVisible) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <button 
-          className="px-4 py-2 bg-gray-700 text-neutral-light rounded hover:bg-gray-600"
-          onClick={() => setInspectorVisible(true)}
-        >
-          Show Inspector
-        </button>
-      </div>
-    );
-  }
+  // Determine if panel should show (has selection and is visible)
+  const shouldShowPanel = hasSelection && inspectorVisible;
 
   return (
-    <div className="bg-secondary h-full rounded-md shadow-md flex flex-col overflow-hidden">
-      <div className="flex flex-col border-b border-gray-700">
-        <div className="flex justify-between items-center p-3">
-          <h2 className="text-lg font-secondary font-semibold text-neutral-light">
+    <>
+      {/* Slide-out Inspector Panel from right side */}
+      <div 
+        className={`
+          fixed top-0 right-0 h-full w-96 bg-primary border-l border-secondary z-50
+          transform transition-transform duration-300 ease-in-out shadow-xl
+          ${shouldShowPanel ? 'translate-x-0' : 'translate-x-full'}
+        `}
+      >
+        {/* Panel Header */}
+        <div className="flex justify-between items-center p-4 border-b border-secondary">
+          <h2 className="text-neutral-light font-medium text-lg">
             {getPanelTitle()}
           </h2>
           <div className="flex space-x-2">
-            {(selectedEntityIds.length > 0 || selectedEventIds.length > 0 || selectedLocationIds.length > 0) && (
-              <button
-                className="p-1.5 text-neutral-medium hover:text-neutral-light"
-                onClick={clearSelection}
-                title="Clear Selection"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
             <button
-              className="p-1.5 text-neutral-medium hover:text-neutral-light"
+              className="p-2 text-neutral-medium hover:text-neutral-light hover:bg-secondary rounded transition-colors"
+              onClick={clearSelection}
+              title="Clear Selection"
+              aria-label="Clear Selection"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <button
+              className="p-2 text-neutral-medium hover:text-neutral-light hover:bg-secondary rounded transition-colors"
               onClick={() => setInspectorVisible(false)}
-              title="Hide Inspector"
+              title="Close Inspector"
+              aria-label="Close Inspector"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -100,94 +108,29 @@ export default function InspectorPanel() {
           </div>
         </div>
         
-        {(selectedEntityIds.length > 0 || selectedEventIds.length > 0 || selectedLocationIds.length > 0) && (
-          <div className="flex px-3 pb-2">
-            <div className="w-full flex border-b border-gray-700">
-              <button
-                className={`py-2 px-4 text-sm font-medium ${
-                  activeTab === 'details' 
-                    ? 'text-accent border-b-2 border-accent' 
-                    : 'text-neutral-medium hover:text-neutral-light'
-                }`}
-                onClick={() => setActiveTab('details')}
-              >
-                Details
-              </button>
-              <button
-                className={`py-2 px-4 text-sm font-medium ${
-                  activeTab === 'annotations' 
-                    ? 'text-accent border-b-2 border-accent' 
-                    : 'text-neutral-medium hover:text-neutral-light'
-                }`}
-                onClick={() => setActiveTab('annotations')}
-              >
-                Annotations
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <div className="flex-1 overflow-y-auto p-4">
-        {(selectedEntityIds.length > 0 || selectedEventIds.length > 0 || selectedLocationIds.length > 0) ? (
-          activeTab === 'details' ? (
+        {/* Panel Content */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {hasSelection ? (
             getSelectedView()
           ) : (
-            <div className="annotations-container">
-              {isCreatingAnnotation ? (
-                <AnnotationCreator
-                  targetId={
-                    selectedEntityIds[0] || 
-                    selectedEventIds[0] || 
-                    selectedLocationIds[0]
-                  }
-                  targetType={
-                    selectedEntityIds.length > 0 ? 'entity' :
-                    selectedEventIds.length > 0 ? 'event' : 'location'
-                  }
-                  onComplete={() => setIsCreatingAnnotation(false)}
-                />
-              ) : (
-                <div className="annotation-actions mb-4 flex space-x-2">
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    onClick={() => setIsCreatingAnnotation(true)}
-                  >
-                    Add Annotation
-                  </button>
-                  
-                  <AnnotationExportButton
-                    targetId={
-                      selectedEntityIds[0] || 
-                      selectedEventIds[0] || 
-                      selectedLocationIds[0]
-                    }
-                    targetType={
-                      selectedEntityIds.length > 0 ? 'entity' :
-                      selectedEventIds.length > 0 ? 'event' : 'location'
-                    }
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                  />
-                </div>
-              )}
-              
-              <AnnotationList
-                targetId={
-                  selectedEntityIds[0] || 
-                  selectedEventIds[0] || 
-                  selectedLocationIds[0]
-                }
-                targetType={
-                  selectedEntityIds.length > 0 ? 'entity' :
-                  selectedEventIds.length > 0 ? 'event' : 'location'
-                }
-              />
-            </div>
-          )
-        ) : (
-          <EmptyStateView />
-        )}
+            <EmptyStateView />
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Collapsed state indicator (when there's selection but panel is closed) */}
+      {hasSelection && !inspectorVisible && (
+        <button
+          className="fixed top-1/2 right-0 transform -translate-y-1/2 bg-accent text-white p-3 rounded-l-lg shadow-lg hover:bg-blue-700 transition-colors z-40"
+          onClick={() => setInspectorVisible(true)}
+          title="Open Inspector"
+          aria-label="Open Inspector Panel"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+    </>
   );
 }
