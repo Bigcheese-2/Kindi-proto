@@ -1,258 +1,166 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Timeline, DataSet } from 'vis-timeline/standalone';
+import React, { useEffect, useRef } from 'react';
+import { Timeline } from 'vis-timeline/standalone';
+import { DataSet } from 'vis-data/peer';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
-import { Event, EventType } from '../../../models/data-types';
-
-interface TimelineItem {
-  id: string;
-  content: string;
-  title: string;
-  start: Date;
-  end?: Date;
-  group: string;
-  className: string;
-  type?: string;
-}
-
-interface TimelineGroup {
-  id: string;
-  content: string;
-  className: string;
-}
+import { Event } from '@/app/models/data-types';
+import './timeline-custom.css';
 
 interface TimelineComponentProps {
   events: Event[];
-  selectedEventIds?: string[];
   onEventClick?: (eventId: string) => void;
-  onRangeChange?: (start: Date, end: Date) => void;
-  className?: string;
 }
 
-// Get display label for event type
-const getEventTypeLabel = (eventType: EventType): string => {
-  const labelMap: Record<EventType, string> = {
-    [EventType.MEETING]: 'Meetings',
-    [EventType.COMMUNICATION]: 'Communications',
-    [EventType.TRANSACTION]: 'Transactions',
-    [EventType.TRAVEL]: 'Travel',
-    [EventType.INCIDENT]: 'Incidents',
-    [EventType.CUSTOM]: 'Other Events',
+const TimelineComponent: React.FC<TimelineComponentProps> = ({ events, onEventClick }) => {
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const timelineInstance = useRef<Timeline | null>(null);
+
+  // Helper function to ensure dates are properly formatted
+  const ensureValidDate = (dateStr: string): Date => {
+    try {
+      // If it's just a date (YYYY-MM-DD), add time
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        return new Date(`${dateStr}T00:00:00Z`);
+      }
+      
+      // Otherwise try to parse it normally
+      const date = new Date(dateStr);
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        console.warn(`Invalid date: ${dateStr}, using current date instead`);
+        return new Date(); // Fallback to current date if invalid
+      }
+      
+      return date;
+    } catch (e) {
+      console.warn(`Error parsing date: ${dateStr}`, e);
+      return new Date(); // Fallback to current date on error
+    }
   };
-  return labelMap[eventType] || labelMap[EventType.CUSTOM];
-};
 
-export const TimelineComponent: React.FC<TimelineComponentProps> = ({
-  events,
-  selectedEventIds = [],
-  onEventClick,
-  onRangeChange,
-  className = '',
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<Timeline | null>(null);
-  const [isReady, setIsReady] = useState(false);
-
-  // Transform events to timeline format
-  const transformEvents = useCallback((): { items: TimelineItem[]; groups: TimelineGroup[] } => {
-    const items: TimelineItem[] = events.map(event => ({
-      id: event.id,
-      content: event.title,
-      title: event.description || event.title,
-      start: new Date(event.time),
-      end: event.endTime ? new Date(event.endTime) : undefined,
-      group: event.type,
-      className: `event-type-${event.type.toLowerCase()}`,
-      type: event.endTime ? 'range' : 'point',
-    }));
-
-    const uniqueEventTypes = Array.from(new Set(events.map(event => event.type)));
-    const groups: TimelineGroup[] = uniqueEventTypes.map(type => ({
-      id: type,
-      content: getEventTypeLabel(type),
-      className: `group-type-${type.toLowerCase()}`,
-    }));
-
-    return { items, groups };
-  }, [events]);
-
-  // Initialize timeline
   useEffect(() => {
-    if (!containerRef.current || timelineRef.current) return;
+    if (!timelineRef.current || !events || events.length === 0) return;
 
-    const { items, groups } = transformEvents();
+    // Clean up any existing instance
+    if (timelineInstance.current) {
+      timelineInstance.current.destroy();
+    }
 
-    const itemsDataSet = new DataSet(items);
-    const groupsDataSet = new DataSet(groups);
+    try {
+      // Prepare data for the timeline with proper date handling
+      const items = events.map(event => {
+        // Ensure valid dates
+        const start = ensureValidDate(event.time);
+        const end = event.endTime ? ensureValidDate(event.endTime) : undefined;
+        
+        // Format the date to display on the right side (DD/MM/YYYY) - matching image format
+        const dateObj = new Date(event.time);
+        const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
+        
+        // Create HTML content with the date on the right side
+        const content = `
+          <div class="timeline-item-content">
+            <div class="timeline-item-title">${event.title}</div>
+            <div class="timeline-item-description">${event.description || ''}</div>
+            <div class="timeline-item-date">${formattedDate}</div>
+          </div>
+        `;
+        
+        return {
+          id: event.id,
+          content: content,
+          start: start,
+          end: end,
+          className: `event-type-${event.type.toLowerCase()}`,
+          title: event.description || event.title, // Tooltip on hover
+        };
+      });
 
-    const options = {
-      height: '100%',
-      stack: true,
-      showCurrentTime: true,
-      zoomable: true,
-      selectable: true,
-      editable: false,
-      margin: {
-        item: 10,
-        axis: 5,
-      },
-      orientation: 'top',
-      groupOrder: 'content',
-      tooltip: {
-        followMouse: true,
-        overflowMethod: 'cap',
-      },
-      format: {
-        minorLabels: {
-          millisecond: 'SSS',
-          second: 's',
-          minute: 'HH:mm',
-          hour: 'HH:mm',
-          weekday: 'ddd D',
-          day: 'D',
-          week: 'w',
-          month: 'MMM',
-          year: 'YYYY',
+      // No grouping - all events in one list
+      
+      // Create dataset (without groups)
+      const itemsDataSet = new DataSet(items);
+
+      // Configuration options for the timeline
+      const options = {
+        stack: true, // Stack items to prevent overlap
+        width: '100%',
+        height: '100%',
+        margin: {
+          item: 20, // More vertical space between items
+          axis: 5,
         },
-        majorLabels: {
-          millisecond: 'HH:mm:ss',
-          second: 'D MMMM HH:mm',
-          minute: 'ddd D MMMM',
-          hour: 'ddd D MMMM',
-          weekday: 'MMMM YYYY',
-          day: 'MMMM YYYY',
-          week: 'MMMM YYYY',
-          month: 'YYYY',
-          year: '',
+        orientation: {
+          axis: 'top',
         },
-      },
-    };
+        showCurrentTime: false, // Hide current time indicator
+        zoomable: false, // Disable zooming to maintain visibility of all events
+        moveable: false, // Disable moving/panning to keep all events visible
+        editable: false,
+        
+        // Format date/time labels at top to match the mockup
+        format: {
+          minorLabels: {
+            day: '',        // Hide day labels
+            month: 'MMM',   // Short month name (Jan, Feb, etc.)
+            year: 'YYYY'    // Full year
+          },
+          majorLabels: {
+            day: 'MMM',     // Show month above days
+            month: '',      // Don't show anything above months
+            year: ''        // Don't show anything above years
+          }
+        },
+        
+        // Allow full range to show all events
+        // start and end are not set so timeline will show all events
+      };
 
-    const timeline = new Timeline(containerRef.current, itemsDataSet, groupsDataSet, options);
+      // Create a new timeline instance (without groups)
+      timelineInstance.current = new Timeline(timelineRef.current, itemsDataSet, options as any);
 
-    // Event handlers
-    timeline.on('select', properties => {
-      if (properties.items.length > 0 && onEventClick) {
-        onEventClick(properties.items[0]);
+      // Add event listener for clicks with error handling
+      if (onEventClick) {
+        timelineInstance.current.on('select', function(properties) {
+          try {
+            if (properties.items && properties.items.length > 0) {
+              onEventClick(properties.items[0] as string);
+            }
+          } catch (err) {
+            console.error('Error handling event click:', err);
+          }
+        });
       }
-    });
 
-    timeline.on('rangechange', properties => {
-      if (onRangeChange) {
-        onRangeChange(new Date(properties.start), new Date(properties.end));
-      }
-    });
-
-    timelineRef.current = timeline;
-    setIsReady(true);
+      // Prevent auto-fit which can cause NaN errors
+      setTimeout(() => {
+        if (timelineInstance.current) {
+          // Fit all items at once
+          timelineInstance.current.fit({animation: false});
+        }
+      }, 100);
+    } catch (err) {
+      console.error('Error initializing timeline:', err);
+    }
 
     return () => {
-      if (timelineRef.current) {
-        timelineRef.current.destroy();
-        timelineRef.current = null;
+      // Clean up the timeline instance on component unmount
+      if (timelineInstance.current) {
+        try {
+          timelineInstance.current.destroy();
+          timelineInstance.current = null;
+        } catch (err) {
+          console.error('Error destroying timeline:', err);
+        }
       }
     };
-  }, [transformEvents, onEventClick, onRangeChange]);
+  }, [events, onEventClick]);
 
-  // Update data when events change
-  useEffect(() => {
-    if (!timelineRef.current || !isReady) return;
+  // No group labels needed
 
-    const { items, groups } = transformEvents();
-
-    const itemsDataSet = new DataSet(items);
-    const groupsDataSet = new DataSet(groups);
-
-    timelineRef.current.setData({
-      groups: groupsDataSet,
-      items: itemsDataSet,
-    });
-  }, [events, transformEvents, isReady]);
-
-  // Update selection when selectedEventIds change
-  useEffect(() => {
-    if (!timelineRef.current || !isReady) return;
-
-    timelineRef.current.setSelection(selectedEventIds);
-  }, [selectedEventIds, isReady]);
-
-  return (
-    <div className={`timeline-container h-full ${className}`}>
-      <div ref={containerRef} className="h-full w-full" style={{ minHeight: '200px' }} />
-
-      <style jsx global>{`
-        .timeline-container .vis-timeline {
-          background: #1f2937;
-          border: none;
-          font-family:
-            system-ui,
-            -apple-system,
-            sans-serif;
-        }
-
-        .timeline-container .vis-item {
-          background: #4b5563;
-          border: 1px solid #6b7280;
-          color: #f9fafb;
-          border-radius: 4px;
-        }
-
-        .timeline-container .vis-item.vis-selected {
-          background: #ef4444;
-          border-color: #dc2626;
-        }
-
-        .timeline-container .vis-item.event-type-meeting {
-          background: #3b82f6;
-          border-color: #2563eb;
-        }
-
-        .timeline-container .vis-item.event-type-communication {
-          background: #10b981;
-          border-color: #059669;
-        }
-
-        .timeline-container .vis-item.event-type-transaction {
-          background: #f59e0b;
-          border-color: #d97706;
-        }
-
-        .timeline-container .vis-item.event-type-travel {
-          background: #8b5cf6;
-          border-color: #7c3aed;
-        }
-
-        .timeline-container .vis-item.event-type-incident {
-          background: #ef4444;
-          border-color: #dc2626;
-        }
-
-        .timeline-container .vis-group-label {
-          background: #374151;
-          color: #f9fafb;
-          border-right: 1px solid #4b5563;
-        }
-
-        .timeline-container .vis-time-axis {
-          background: #374151;
-          color: #d1d5db;
-        }
-
-        .timeline-container .vis-grid.vis-minor {
-          border-color: #4b5563;
-        }
-
-        .timeline-container .vis-grid.vis-major {
-          border-color: #6b7280;
-        }
-
-        .timeline-container .vis-current-time {
-          background: #f59e0b;
-        }
-      `}</style>
-    </div>
-  );
+  return <div ref={timelineRef} className="h-full w-full" />;
 };
 
 export default TimelineComponent;

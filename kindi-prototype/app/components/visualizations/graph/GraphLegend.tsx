@@ -37,14 +37,14 @@ export const GraphLegend: React.FC<GraphLegendProps> = ({ className = '' }) => {
   const entityTypes = Object.values(EntityType);
 
   return (
-    <div className={`bg-secondary rounded-md p-3 ${className}`}>
-      <h3 className="text-xs font-medium text-neutral-light mb-2">Entity Types</h3>
+    <div className={`bg-secondary rounded-md p-2.5 shadow-lg opacity-90 ${className}`}>
+      <h3 className="text-xs font-semibold text-neutral-light mb-1.5">Entity Types</h3>
 
-      <div className="space-y-1.5">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
         {entityTypes.map(entityType => (
-          <div key={entityType} className="flex items-center space-x-2">
+          <div key={entityType} className="flex items-center space-x-1.5">
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-2.5 h-2.5 rounded-full"
               style={{ backgroundColor: getColorForEntityType(entityType) }}
             />
             <span className="text-xs text-neutral-light">{getEntityTypeLabel(entityType)}</span>
@@ -53,16 +53,16 @@ export const GraphLegend: React.FC<GraphLegendProps> = ({ className = '' }) => {
       </div>
 
       {/* Relationship Legend */}
-      <h3 className="text-xs font-medium text-neutral-light mb-2 mt-4">Relationships</h3>
+      <h3 className="text-xs font-semibold text-neutral-light mb-1.5 mt-3">Relationships</h3>
 
-      <div className="space-y-1.5">
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-0.5 bg-neutral-light"></div>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+        <div className="flex items-center space-x-1.5">
+          <div className="w-5 h-0.5 bg-neutral-light"></div>
           <span className="text-xs text-neutral-light">Directed</span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5">
           <div
-            className="w-6 h-0.5"
+            className="w-5 h-0.5"
             style={{
               borderTop: '1px dashed #A0AEC0',
               backgroundColor: 'transparent',

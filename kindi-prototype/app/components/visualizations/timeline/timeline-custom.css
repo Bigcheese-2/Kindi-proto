@@ -1,0 +1,163 @@
+/* Custom styles for vis-timeline to match the application's dark theme */
+
+.vis-timeline {
+  border: none !important;
+  background-color: #1A1E23 !important;
+  color: #E1E5EB !important;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Timeline items */
+.vis-item {
+  background-color: transparent !important;
+  border: none !important;
+  color: #E1E5EB !important;
+  font-size: 14px !important;
+}
+
+.vis-item.vis-selected {
+  background-color: rgba(62, 123, 250, 0.1) !important;
+  border-color: rgba(62, 123, 250, 0.2) !important;
+}
+
+/* Make sure content is visible */
+.vis-item-content {
+  display: block !important;
+  padding: 5px !important;
+  overflow: visible !important; 
+  white-space: normal !important;
+}
+
+/* Custom template styling */
+.timeline-item-content {
+  padding-left: 15px;
+  padding-right: 70px; /* Add space for the date on the right */
+  position: relative;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.timeline-item-content::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #E74C3C;
+}
+
+.event-type-meeting .timeline-item-content::before {
+  background-color: #E74C3C;
+}
+
+.event-type-transaction .timeline-item-content::before {
+  background-color: #F39C12;
+}
+
+.event-type-communication .timeline-item-content::before {
+  background-color: #3E7BFA;
+}
+
+.event-type-travel .timeline-item-content::before {
+  background-color: #2ECC71;
+}
+
+.event-type-incident .timeline-item-content::before {
+  background-color: #E74C3C;
+}
+
+.timeline-item-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #E1E5EB;
+  line-height: 1.2;
+}
+
+.timeline-item-description {
+  font-size: 14px;
+  color: #C4C9D4;
+  margin-top: 4px;
+}
+
+/* Style for the date that appears on the right side */
+.timeline-item-date {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8A9199;
+  font-size: 12px;
+  text-align: right;
+}
+
+/* Month labels */
+.vis-time-axis .vis-text {
+  color: #C4C9D4 !important;
+  font-size: 14px !important;
+  font-weight: normal !important;
+}
+
+/* Groups (e.g., "Meetings") */
+.vis-labelset .vis-label {
+  color: #E1E5EB !important;
+  font-weight: 600 !important;
+  padding: 10px !important;
+  font-size: 14px !important;
+  background-color: #1A1E23 !important;
+  border-color: #2A2F36 !important;
+}
+
+/* Time axis */
+.vis-time-axis {
+  background-color: #1A1E23 !important;
+}
+
+.vis-time-axis .vis-grid.vis-major {
+  border-color: #2A2F36 !important;
+}
+
+.vis-time-axis .vis-grid.vis-minor {
+  border-color: transparent !important;
+}
+
+.vis-panel.vis-center,
+.vis-panel.vis-left,
+.vis-panel.vis-right {
+  border-color: #2A2F36 !important;
+}
+
+/* Current time bar */
+.vis-current-time {
+  background-color: #3E7BFA !important;
+  width: 1px !important;
+}
+
+/* Hide borders */
+.vis-panel.vis-bottom,
+.vis-panel.vis-center,
+.vis-panel.vis-left,
+.vis-panel.vis-right,
+.vis-panel.vis-top {
+  border: none !important;
+}
+
+.vis-foreground .vis-group {
+  border-bottom: 1px solid #2A2F36 !important;
+}
+
+/* Timeline background */
+.vis-content {
+  background-color: #1A1E23 !important;
+}
+
+/* Date labels at the top */
+.vis-text.vis-major {
+  font-weight: 600 !important;
+}
+
+.vis-text.vis-minor {
+  font-weight: normal !important;
+  color: #8A9199 !important;
+}

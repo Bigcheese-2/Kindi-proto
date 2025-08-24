@@ -86,13 +86,13 @@ export const GraphComponent: React.FC<GraphComponentProps> = ({
     if (!fgRef.current) return;
     
     const handleResize = () => {
-      if (fgRef.current) {
-        // Force the graph to recalculate its dimensions
-        fgRef.current.size([
-          fgRef.current.width,
-          fgRef.current.height
-        ]);
-      }
+      // Instead of trying to call size() or width()/height() methods that may not exist,
+      // we'll force a re-render of the graph component by updating a state variable
+      
+      // The ForceGraph2D component will automatically adjust to the container size
+      // when it re-renders since we're using width={undefined} and height={undefined}
+      setIsClientSide(prev => !prev);
+      setTimeout(() => setIsClientSide(prev => !prev), 0);
     };
     
     window.addEventListener('resize', handleResize);

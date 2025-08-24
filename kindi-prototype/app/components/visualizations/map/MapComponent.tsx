@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { GeoLocation, Entity } from '../../../models/data-types';
 import 'leaflet/dist/leaflet.css';
+import MapMarkerFix from './MapMarkerFix';
 
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), {
@@ -55,8 +56,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   const [isClient, setIsClient] = useState(false);
 
   // Default map settings
-  const defaultCenter: [number, number] = [40.7128, -74.006]; // New York City
-  const defaultZoom = 10;
+  const defaultCenter: [number, number] = [51.5074, 10.0]; // Center of Europe
+  const defaultZoom = 4; // Zoomed out to show multiple European locations
 
   // Map tile URLs based on mapType
   const mapTiles = {
@@ -70,13 +71,17 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     }
   };
 
-  // Set client-side flag
+  // Set client-side flag and fix map markers
   useEffect(() => {
     setIsClient(true);
+    
+    // Apply the Leaflet marker fix
+    MapMarkerFix();
   }, []);
 
   // Transform location data to markers
   useEffect(() => {
+
     const newMarkers: MarkerData[] = locations.map(location => {
       // Find entities associated with this location
       const relatedEntities = entities.filter(
@@ -101,7 +106,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   // Handle marker click
   const handleMarkerClick = useCallback(
     (locationId: string) => {
+      console.log("Location clicked:", locationId);
       if (onLocationClick) {
+        // This should trigger the location selection in the app
         onLocationClick(locationId);
       }
     },
@@ -121,7 +128,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   }
 
   return (
-    <div className={`relative h-full ${className}`}>
+    <div className={`relative h-full ${className} z-0`}>
       <MapContainer
         center={defaultCenter}
         zoom={defaultZoom}

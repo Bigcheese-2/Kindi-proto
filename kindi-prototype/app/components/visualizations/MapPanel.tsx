@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useData } from '@/app/contexts/DataContext';
 import { useSelection } from '@/app/contexts/SelectionContext';
 import ExportButton from '../core/export/ExportButton';
@@ -32,6 +32,56 @@ export default function MapPanel() {
   
   const isLocationSelected = (locationId: string) => selectedLocationIds.includes(locationId);
   
+  // Mock location data to ensure map always has markers
+  const mockLocations = [
+    {
+      id: 'moscow-location',
+      latitude: 55.7558, 
+      longitude: 37.6173,
+      name: 'Moscow',
+      type: 'CITY',
+      address: 'Moscow, Russia',
+    },
+    {
+      id: 'berlin-location',
+      latitude: 52.5200, 
+      longitude: 13.4050,
+      name: 'Berlin',
+      type: 'CITY',
+      address: 'Berlin, Germany',
+    },
+    {
+      id: 'london-location',
+      latitude: 51.5074, 
+      longitude: -0.1278,
+      name: 'London',
+      type: 'CITY',
+      address: 'London, United Kingdom',
+    },
+    {
+      id: 'kyiv-location',
+      latitude: 50.4501, 
+      longitude: 30.5234,
+      name: 'Kyiv',
+      type: 'CITY',
+      address: 'Kyiv, Ukraine',
+    }
+  ];
+  
+  // Create a dataset with mock locations if needed
+  const effectiveDataset = useMemo(() => {
+    if (currentDataset && currentDataset.locations && currentDataset.locations.length > 0) {
+      // Use the real dataset if it has locations
+      return currentDataset;
+    }
+    
+    // Otherwise create a modified dataset with mock locations
+    return {
+      ...currentDataset,
+      locations: mockLocations,
+    };
+  }, [currentDataset]);
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center p-3 border-b border-secondary">
@@ -60,21 +110,12 @@ export default function MapPanel() {
         </div>
       </div>
       
-      <div ref={mapRef} className="flex-1 relative">
+      <div ref={mapRef} className="flex-1 relative z-0">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="w-16 h-16 rounded-full border-t-2 border-b-2 border-accent animate-spin mb-2"></div>
               <p className="text-neutral-light text-sm">Interactive Map Loading...</p>
-            </div>
-          </div>
-        ) : !currentDataset?.locations?.length ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <svg className="w-24 h-24 text-accent opacity-20 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-neutral-light text-sm">No location data available</p>
             </div>
           </div>
         ) : (
@@ -106,8 +147,8 @@ export default function MapPanel() {
               `}</style>
               
               <MapComponent
-                locations={currentDataset.locations}
-                entities={currentDataset.entities}
+                locations={effectiveDataset.locations}
+                entities={effectiveDataset.entities || []}
                 selectedLocationIds={selectedLocationIds}
                 onLocationClick={selectLocation}
                 mapType={mapType}

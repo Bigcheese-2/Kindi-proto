@@ -200,7 +200,7 @@ export default function GraphPanel() {
         />
 
         {/* Graph Legend */}
-        <GraphLegend className="absolute bottom-3 left-3 z-10 max-w-xs" />
+        <GraphLegend className="absolute bottom-3 right-3 z-10 max-w-xs" />
       </div>
     </div>
   );

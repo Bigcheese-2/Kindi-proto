@@ -53,14 +53,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                               <MapPanel />
                             </div>
                             
-                            {/* Timeline panel - bottom, spanning full width (as per PRD) */}
-                            <div className="col-span-3 row-span-1">
+                            {/* Timeline panel - bottom-left */}
+                            <div className="col-span-2 row-span-1 border-r border-secondary">
                               <TimelinePanel />
                             </div>
+
+                            {/* Inspector panel - bottom-right */}
+                            <div className="col-span-1 row-span-1">
+                              <InspectorPanel />
+                            </div>
                           </div>
-                          
-                          {/* Inspector Panel - Right sidebar overlay (per PRD) */}
-                          <InspectorPanel />
                         </div>
                       </div>
                     </main>
