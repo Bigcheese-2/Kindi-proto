@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Timeline, DataSet } from 'vis-timeline/standalone';
-import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import { Event, EventType } from '../../../models/data-types';
 
 interface TimelineItem {
@@ -51,8 +49,14 @@ export const TimelineComponent: React.FC<TimelineComponentProps> = ({
   className = '',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<Timeline | null>(null);
+  const timelineRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Transform events to timeline format
   const transformEvents = useCallback((): { items: TimelineItem[]; groups: TimelineGroup[] } => {
@@ -77,75 +81,89 @@ export const TimelineComponent: React.FC<TimelineComponentProps> = ({
     return { items, groups };
   }, [events]);
 
-  // Initialize timeline
+  // Initialize timeline with dynamic imports
   useEffect(() => {
-    if (!containerRef.current || timelineRef.current) return;
+    if (!isClient || !containerRef.current || timelineRef.current) return;
 
-    const { items, groups } = transformEvents();
+    const initializeTimeline = async () => {
+      try {
+        // Dynamically import vis-timeline to avoid SSR issues
+        const { Timeline, DataSet } = await import('vis-timeline/standalone');
 
-    const itemsDataSet = new DataSet(items);
-    const groupsDataSet = new DataSet(groups);
+        // Dynamically import the CSS
+        await import('vis-timeline/styles/vis-timeline-graph2d.css');
 
-    const options = {
-      height: '100%',
-      stack: true,
-      showCurrentTime: true,
-      zoomable: true,
-      selectable: true,
-      editable: false,
-      margin: {
-        item: 10,
-        axis: 5,
-      },
-      orientation: 'top',
-      groupOrder: 'content',
-      tooltip: {
-        followMouse: true,
-        overflowMethod: 'cap',
-      },
-      format: {
-        minorLabels: {
-          millisecond: 'SSS',
-          second: 's',
-          minute: 'HH:mm',
-          hour: 'HH:mm',
-          weekday: 'ddd D',
-          day: 'D',
-          week: 'w',
-          month: 'MMM',
-          year: 'YYYY',
-        },
-        majorLabels: {
-          millisecond: 'HH:mm:ss',
-          second: 'D MMMM HH:mm',
-          minute: 'ddd D MMMM',
-          hour: 'ddd D MMMM',
-          weekday: 'MMMM YYYY',
-          day: 'MMMM YYYY',
-          week: 'MMMM YYYY',
-          month: 'YYYY',
-          year: '',
-        },
-      },
+        const { items, groups } = transformEvents();
+
+        const itemsDataSet = new DataSet(items);
+        const groupsDataSet = new DataSet(groups);
+
+        const options = {
+          height: '100%',
+          stack: true,
+          showCurrentTime: true,
+          zoomable: true,
+          selectable: true,
+          editable: false,
+          margin: {
+            item: 10,
+            axis: 5,
+          },
+          orientation: 'top',
+          groupOrder: 'content',
+          tooltip: {
+            followMouse: true,
+            overflowMethod: 'cap',
+          },
+          format: {
+            minorLabels: {
+              millisecond: 'SSS',
+              second: 's',
+              minute: 'HH:mm',
+              hour: 'HH:mm',
+              weekday: 'ddd D',
+              day: 'D',
+              week: 'w',
+              month: 'MMM',
+              year: 'YYYY',
+            },
+            majorLabels: {
+              millisecond: 'HH:mm:ss',
+              second: 'D MMMM HH:mm',
+              minute: 'ddd D MMMM',
+              hour: 'ddd D MMMM',
+              weekday: 'MMMM YYYY',
+              day: 'MMMM YYYY',
+              week: 'MMMM YYYY',
+              month: 'YYYY',
+              year: '',
+            },
+          },
+        };
+
+        const timeline = new Timeline(containerRef.current!, itemsDataSet, groupsDataSet, options);
+
+        // Event handlers
+        timeline.on('select', properties => {
+          if (properties.items.length > 0 && onEventClick) {
+            onEventClick(properties.items[0]);
+          }
+        });
+
+        timeline.on('rangechange', properties => {
+          if (onRangeChange) {
+            onRangeChange(new Date(properties.start), new Date(properties.end));
+          }
+        });
+
+        timelineRef.current = timeline;
+        setIsReady(true);
+      } catch (error) {
+        console.error('Failed to initialize timeline:', error);
+      }
     };
 
-    const timeline = new Timeline(containerRef.current, itemsDataSet, groupsDataSet, options);
-
-    // Event handlers
-    timeline.on('select', properties => {
-      if (properties.items.length > 0 && onEventClick) {
-        onEventClick(properties.items[0]);
-      }
-    });
-
-    timeline.on('rangechange', properties => {
-      if (onRangeChange) {
-        onRangeChange(new Date(properties.start), new Date(properties.end));
-      }
-    });
-
-    timelineRef.current = timeline;
-    setIsReady(true);
+    initializeTimeline();
 
     return () => {
       if (timelineRef.current) {
@@ -153,21 +171,30 @@ export const TimelineComponent: React.FC<TimelineComponentProps> = ({
         timelineRef.current = null;
       }
     };
-  }, [transformEvents, onEventClick, onRangeChange]);
+  }, [isClient, transformEvents, onEventClick, onRangeChange]);
 
   // Update data when events change
   useEffect(() => {
     if (!timelineRef.current || !isReady) return;
 
-    const { items, groups } = transformEvents();
+    const updateTimelineData = async () => {
+      try {
+        const { DataSet } = await import('vis-timeline/standalone');
+        const { items, groups } = transformEvents();
 
-    const itemsDataSet = new DataSet(items);
-    const groupsDataSet = new DataSet(groups);
+        const itemsDataSet = new DataSet(items);
+        const groupsDataSet = new DataSet(groups);
 
-    timelineRef.current.setData({
-      groups: groupsDataSet,
-      items: itemsDataSet,
-    });
+        timelineRef.current!.setData({
+          groups: groupsDataSet,
+          items: itemsDataSet,
+        });
+      } catch (error) {
+        console.error('Failed to update timeline data:', error);
+      }
+    };
+
+    updateTimelineData();
   }, [events, transformEvents, isReady]);
 
   // Update selection when selectedEventIds change
@@ -176,6 +203,18 @@ export const TimelineComponent: React.FC<TimelineComponentProps> = ({
 
     timelineRef.current.setSelection(selectedEventIds);
   }, [selectedEventIds, isReady]);
+
+  // Show loading state for SSR or before client-side hydration is complete
+  if (!isClient) {
+    return (
+      <div className={`flex items-center justify-center h-full ${className}`}>
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-full border-t-2 border-b-2 border-accent animate-spin mb-2"></div>
+          <p className="text-neutral-light text-sm">Loading timeline...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`timeline-container h-full ${className}`}>

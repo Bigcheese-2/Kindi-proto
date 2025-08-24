@@ -14,7 +14,7 @@ export default function GraphPanel() {
   const { currentDataset, isLoading, error } = useData();
   const { selectedEntityIds, selectEntity } = useSelection();
   const { filters } = useFilters();
-  const graphRef = useRef<any>();
+  const graphRef = useRef<any>(null);
   const [expanded, setExpanded] = useState(false);
 
   // Apply filters to get filtered dataset
@@ -41,18 +41,54 @@ export default function GraphPanel() {
     }
   }, []);
 
-  const handleResetView = useCallback(() => {
-    if (graphRef.current) {
-      graphRef.current.zoomToFit(400);
-    }
-  }, []);
+ const handleResetView = useCallback(() => {
+   if (graphRef.current) {
+     // Get container dimensions to calculate top positioning
+     const container = graphRef.current.getCanvas();
+     if (container) {
+       const containerWidth = container.width;
+       const containerHeight = container.height;
 
-  const handleFitToView = useCallback(() => {
-    if (graphRef.current) {
-      graphRef.current.zoomToFit(400);
-    }
-  }, []);
-  
+       // Position at top center of container for immediate visibility
+       const offsetX = 0; // Center horizontally
+       const offsetY = -containerHeight / 4; // Position towards top (negative value moves up)
+
+       // First fit to view, then position at top
+       graphRef.current.zoomToFit(400, 50);
+       setTimeout(() => {
+         if (graphRef.current) {
+           graphRef.current.centerAt(offsetX, offsetY, 100);
+           // Set good zoom level for visibility
+           graphRef.current.zoom(1);
+         }
+       }, 200);
+     }
+   }
+ }, []);
+
+ const handleFitToView = useCallback(() => {
+   if (graphRef.current) {
+     // Get container dimensions to calculate top positioning
+     const container = graphRef.current.getCanvas();
+     if (container) {
+       const containerWidth = container.width;
+       const containerHeight = container.height;
+
+       // Position at top center of container for immediate visibility
+       const offsetX = 0; // Center horizontally
+       const offsetY = -containerHeight / 4; // Position towards top (negative value moves up)
+
+       // Fit to view and position at top
+       graphRef.current.zoomToFit(300, 40);
+       setTimeout(() => {
+         if (graphRef.current) {
+           graphRef.current.centerAt(offsetX, offsetY, 200);
+         }
+       }, 150);
+     }
+   }
+ }, []);
+
   const toggleExpand = useCallback(() => {
     setExpanded(!expanded);
   }, [expanded]);
@@ -90,7 +126,9 @@ export default function GraphPanel() {
                 />
               </svg>
             </div>
-            <p className="text-neutral-medium text-sm">Error loading graph: {error}</p>
+            <p className="text-neutral-medium text-sm">
+              Error loading graph: {error?.toString() || 'Unknown error'}
+            </p>
           </div>
         </div>
       </div>
@@ -140,13 +178,18 @@ export default function GraphPanel() {
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <button 
+          <button
             className="px-2 py-1 rounded text-xs bg-secondary text-neutral-light border border-secondary hover:border-accent transition-colors flex items-center"
             aria-label="Expand"
             onClick={toggleExpand}
           >
             <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"
+              />
             </svg>
             Expand
           </button>
@@ -157,7 +200,12 @@ export default function GraphPanel() {
             buttonText={
               <>
                 <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
                 </svg>
                 Export
               </>
@@ -170,8 +218,18 @@ export default function GraphPanel() {
         {!hasFilteredData && filters.length > 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <svg className="w-12 h-12 text-neutral-medium mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              <svg
+                className="w-12 h-12 text-neutral-medium mx-auto mb-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
               </svg>
               <p className="text-neutral-medium text-sm">No entities match the current filters</p>
               <p className="text-neutral-medium text-xs mt-1">Try adjusting your filter criteria</p>

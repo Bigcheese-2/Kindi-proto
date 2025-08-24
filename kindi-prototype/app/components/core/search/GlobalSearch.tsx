@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import SearchBar from './SearchBar';
@@ -6,26 +6,24 @@ import SearchResults from './SearchResults';
 import SearchHistory from './SearchHistory';
 import { useData } from '@/app/contexts/DataContext';
 import { useSelection } from '@/app/contexts/SelectionContext';
-import { 
-  SearchResult, 
+import { useFilters } from '@/app/contexts/FilterContext';
+import {
+  SearchResult,
   SearchResults as SearchResultsType,
-  globalSearch 
+  globalSearch,
 } from '@/app/lib/search/searchService';
-import { 
-  getSearchHistory, 
-  saveSearchToHistory, 
+import {
+  getSearchHistory,
+  saveSearchToHistory,
   clearSearchHistory,
-  SearchHistoryItem 
+  SearchHistoryItem,
 } from '@/app/lib/search/searchHistory';
 
 export default function GlobalSearch() {
   const { currentDataset } = useData();
-  const { 
-    selectEntity, 
-    selectEvent, 
-    selectLocation 
-  } = useSelection();
-  
+  const { selectEntity, selectEvent, selectLocation, clearSelection } = useSelection();
+  const { clearFilters } = useFilters();
+
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -33,43 +31,43 @@ export default function GlobalSearch() {
     entities: [],
     events: [],
     locations: [],
-    totalCount: 0
+    totalCount: 0,
   });
   const [history, setHistory] = useState<SearchHistoryItem[]>([]);
-  
+
   // Load search history on mount
   useEffect(() => {
     const loadHistory = () => {
       const searchHistory = getSearchHistory();
       setHistory(searchHistory);
     };
-    
+
     loadHistory();
-    
+
     // Set up event listener for storage changes
     const handleStorageChange = () => {
       loadHistory();
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
-  
+
   const handleSearch = (searchQuery: string) => {
     if (!currentDataset) return;
-    
+
     setQuery(searchQuery);
     setIsLoading(true);
     setShowResults(true);
-    
+
     // Delay search for better UX
     setTimeout(() => {
       const searchResults = globalSearch(searchQuery, currentDataset);
       setResults(searchResults);
       setIsLoading(false);
-      
+
       // Save to history if we got results or if it's a substantive query
       if (searchResults.totalCount > 0 || searchQuery.length > 2) {
         const updatedHistory = saveSearchToHistory(searchQuery);
@@ -77,34 +75,43 @@ export default function GlobalSearch() {
       }
     }, 300);
   };
-  
+
   const handleSelectResult = (result: SearchResult) => {
-    switch (result.type) {
-      case 'entity':
-        selectEntity(result.id);
-        break;
-      case 'event':
-        selectEvent(result.id);
-        break;
-      case 'location':
-        selectLocation(result.id);
-        break;
-    }
+    // Clear any existing filters that might prevent the search result from being visible
+    clearFilters();
+
+    // Clear existing selections to focus on the searched item
+    clearSelection();
+
+    // Clear the search interface immediately for better UX
     setShowResults(false);
+    setQuery('');
+
+    // Small delay to ensure filters are cleared before selecting
+    setTimeout(() => {
+      switch (result.type) {
+        case 'entity':
+          selectEntity(result.id, true, 'graph'); // Exclusive selection with source context
+          break;
+        case 'event':
+          selectEvent(result.id, true, 'timeline'); // Exclusive selection with source context
+          break;
+        case 'location':
+          selectLocation(result.id, true, 'map'); // Exclusive selection with source context
+          break;
+      }
+    }, 50);
   };
-  
+
   const handleClearHistory = () => {
     clearSearchHistory();
     setHistory([]);
   };
-  
+
   return (
     <div className="relative">
-      <SearchBar 
-        onSearch={handleSearch}
-        isLoading={isLoading}
-      />
-      
+      <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+
       {showResults && (query || isLoading) && (
         <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-secondary border border-border-color rounded-md shadow-lg z-10">
           <SearchResults
@@ -114,7 +121,7 @@ export default function GlobalSearch() {
           />
         </div>
       )}
-      
+
       {!showResults && history.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-secondary border border-border-color rounded-md shadow-lg z-10">
           <SearchHistory

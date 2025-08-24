@@ -1,6 +1,14 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  ReactNode,
+} from 'react';
 
 // Keyboard shortcut types
 export interface KeyboardShortcut {
@@ -25,7 +33,7 @@ const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined
 export const KeyboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [shortcuts, setShortcuts] = useState<KeyboardShortcut[]>([]);
   const [showDialog, setShowDialog] = useState<boolean>(false);
-  
+
   // Register a new shortcut
   const registerShortcut = useCallback((shortcut: KeyboardShortcut) => {
     setShortcuts(prev => {
@@ -34,21 +42,21 @@ export const KeyboardProvider: React.FC<{ children: ReactNode }> = ({ children }
       return [...filtered, shortcut];
     });
   }, []);
-  
+
   // Unregister a shortcut
   const unregisterShortcut = useCallback((id: string) => {
     setShortcuts(prev => prev.filter(s => s.id !== id));
   }, []);
-  
+
   // Show shortcuts dialog
   const showShortcutsDialog = useCallback(() => {
     setShowDialog(true);
   }, []);
-  
+
   // Handle keyboard events
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if in an input field
       if (
@@ -58,14 +66,14 @@ export const KeyboardProvider: React.FC<{ children: ReactNode }> = ({ children }
       ) {
         return;
       }
-      
+
       // Check for help dialog shortcut (?)
       if (e.key === '?' && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
         setShowDialog(true);
         return;
       }
-      
+
       // Check for registered shortcuts
       for (const shortcut of shortcuts) {
         // Check if all keys in the shortcut are pressed
@@ -76,7 +84,7 @@ export const KeyboardProvider: React.FC<{ children: ReactNode }> = ({ children }
           if (key === 'Meta') return e.metaKey;
           return e.key === key;
         });
-        
+
         if (matchesShortcut) {
           e.preventDefault();
           shortcut.action();
@@ -84,22 +92,25 @@ export const KeyboardProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [shortcuts]);
-  
+
   // Create context value
-  const contextValue = useMemo<KeyboardContextType>(() => ({
-    shortcuts,
-    registerShortcut,
-    unregisterShortcut,
-    showShortcutsDialog
-  }), [shortcuts, registerShortcut, unregisterShortcut, showShortcutsDialog]);
-  
+  const contextValue = useMemo<KeyboardContextType>(
+    () => ({
+      shortcuts,
+      registerShortcut,
+      unregisterShortcut,
+      showShortcutsDialog,
+    }),
+    [shortcuts, registerShortcut, unregisterShortcut, showShortcutsDialog]
+  );
+
   return (
     <KeyboardContext.Provider value={contextValue}>
       {children}
@@ -111,7 +122,7 @@ export const KeyboardProvider: React.FC<{ children: ReactNode }> = ({ children }
 };
 
 // Keyboard shortcuts dialog component
-const KeyboardShortcutsDialog: React.FC<{ 
+const KeyboardShortcutsDialog: React.FC<{
   onClose: () => void;
   shortcuts: KeyboardShortcut[];
 }> = ({ onClose, shortcuts }) => {
@@ -126,26 +137,26 @@ const KeyboardShortcutsDialog: React.FC<{
     },
     {}
   );
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Keyboard Shortcuts</h2>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             aria-label="Close dialog"
           >
             ✕
           </button>
         </div>
-        
+
         <div className="space-y-6">
           {Object.entries(shortcutsByCategory).map(([category, shortcuts]) => (
             <div key={category} className="shortcut-category">
               <h3 className="text-lg font-medium mb-2 capitalize">{category}</h3>
-              
+
               <table className="w-full border-collapse">
                 <tbody>
                   {shortcuts.map(shortcut => (
@@ -164,26 +175,26 @@ const KeyboardShortcutsDialog: React.FC<{
                           ))}
                         </div>
                       </td>
-                      <td className="py-2 pl-4">
-                        {shortcut.description}
-                      </td>
+                      <td className="py-2 pl-4">{shortcut.description}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ))}
-          
+
           {shortcuts.length === 0 && (
-            <p className="text-center text-gray-500">
-              No keyboard shortcuts registered.
-            </p>
+            <p className="text-center text-gray-500">No keyboard shortcuts registered.</p>
           )}
         </div>
-        
+
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
-            Press <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 text-sm">?</kbd> at any time to show this dialog.
+            Press{' '}
+            <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 text-sm">
+              ?
+            </kbd>{' '}
+            at any time to show this dialog.
           </p>
         </div>
       </div>
@@ -194,10 +205,10 @@ const KeyboardShortcutsDialog: React.FC<{
 // Custom hook for using keyboard shortcuts
 export const useKeyboard = (): KeyboardContextType => {
   const context = useContext(KeyboardContext);
-  
+
   if (context === undefined) {
     throw new Error('useKeyboard must be used within a KeyboardProvider');
   }
-  
+
   return context;
 };

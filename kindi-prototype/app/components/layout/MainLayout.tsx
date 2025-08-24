@@ -30,36 +30,39 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     <SkipLink targetId="main-content" />
                     <ScreenReaderAnnouncer politeness="polite" />
                     <ScreenReaderAnnouncer politeness="assertive" />
-                    
+
                     <AppHeader />
-                    
+
                     <main className="flex-1 overflow-auto relative" id="main-content">
                       <div className="flex h-full">
                         {/* Left sidebar - Control Panel */}
                         <div className="w-64 h-full border-r border-secondary">
                           <ControlPanel />
                         </div>
-                        
+
                         {/* Main content area */}
-                        <div className="flex-1 relative">
-                          <div className="grid grid-cols-3 grid-rows-2 gap-0 h-full">
-                            {/* Graph panel - top-left, largest (as per PRD) */}
-                            <div className="col-span-2 row-span-1 border-r border-secondary border-b border-secondary">
-                              <GraphPanel />
-                            </div>
-                            
-                            {/* Map panel - top-right (as per PRD) */}
-                            <div className="col-span-1 row-span-1 border-b border-secondary">
-                              <MapPanel />
-                            </div>
-                            
-                            {/* Timeline panel - bottom, spanning full width (as per PRD) */}
-                            <div className="col-span-3 row-span-1">
-                              <TimelinePanel />
+                        <div className="flex-1 flex">
+                          {/* Main visualization area */}
+                          <div className="flex-1 relative">
+                            <div className="grid grid-cols-3 grid-rows-2 gap-0 h-full">
+                              {/* Graph panel - top-left, largest (as per PRD) */}
+                              <div className="col-span-2 row-span-1 border-r border-secondary border-b border-secondary">
+                                <GraphPanel />
+                              </div>
+
+                              {/* Map panel - top-right (as per PRD) */}
+                              <div className="col-span-1 row-span-1 border-b border-secondary">
+                                <MapPanel />
+                              </div>
+
+                              {/* Timeline panel - bottom, spanning full width (as per PRD) */}
+                              <div className="col-span-3 row-span-1">
+                                <TimelinePanel />
+                              </div>
                             </div>
                           </div>
-                          
-                          {/* Inspector Panel - Right sidebar overlay (per PRD) */}
+
+                          {/* Inspector Panel - Right sidebar (no longer overlay) */}
                           <InspectorPanel />
                         </div>
                       </div>

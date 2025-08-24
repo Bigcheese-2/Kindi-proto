@@ -4,6 +4,22 @@ import React, { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { GeoLocation, Entity } from '../../../models/data-types';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix Leaflet marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAApCAYAAADAk4LOAAAFgUlEQVR4Aa1XA5BjWRTN2oW17d3YaZtr2962HUzbXNfN1+3Ue1FMV3G5eIiCgRULdkGGWs6wjgjIJlSAYgGCWqhkVGZUGUZUWUeWUZ5fmw==',
+  iconUrl:
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAApCAYAAADAk4LOAAAFgUlEQVR4Aa1XA5BjWRTN2oW17d3YaZtr2962HUzbXNfN1+3Ue1FMV3G5eIiCgRULdkGGWs6wjgjIJlSAYgGCWqhkVGZUGUZUWUeWUZ5fm',
+  shadowUrl:
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAI9SURBVFiFtZY9aBNRFIafSkQsgrAoFgpCKxtbG1tbG0tbWxsLwcJCsLCwsLCwECzCwkKwsFCsLCxsLCxsKxsLCwsLCwsLCwsKCwsLCwsKCwsKC7CwsLCwE=',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), {
@@ -15,13 +31,15 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
         <p className="text-neutral-light text-sm">Loading map...</p>
       </div>
     </div>
-  )
+  ),
 });
 
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
-const ZoomControl = dynamic(() => import('react-leaflet').then(mod => mod.ZoomControl), { ssr: false });
+const ZoomControl = dynamic(() => import('react-leaflet').then(mod => mod.ZoomControl), {
+  ssr: false,
+});
 
 interface MarkerData {
   id: string;
@@ -62,12 +80,14 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   const mapTiles = {
     streets: {
       url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     },
     satellite: {
       url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-    }
+      attribution:
+        'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    },
   };
 
   // Set client-side flag
@@ -131,10 +151,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         attributionControl={false}
       >
         {/* Selected tile layer based on mapType */}
-        <TileLayer
-          url={mapTiles[mapType].url}
-          attribution={mapTiles[mapType].attribution}
-        />
+        <TileLayer url={mapTiles[mapType].url} attribution={mapTiles[mapType].attribution} />
 
         {/* Render markers */}
         {markers.map(marker => (
