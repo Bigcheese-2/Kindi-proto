@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SearchBar from './SearchBar';
 import SearchResults from './SearchResults';
 import SearchHistory from './SearchHistory';
@@ -26,6 +26,7 @@ export default function GlobalSearch() {
     selectLocation 
   } = useSelection();
   
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -54,6 +55,20 @@ export default function GlobalSearch() {
     window.addEventListener('storage', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+  
+  // Handle clicks outside of the search component to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
   
@@ -99,14 +114,14 @@ export default function GlobalSearch() {
   };
   
   return (
-    <div className="relative">
+    <div className="relative" ref={searchContainerRef}>
       <SearchBar 
         onSearch={handleSearch}
         isLoading={isLoading}
       />
       
       {showResults && (query || isLoading) && (
-        <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-secondary border border-border-color rounded-md shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-[#1A1E23] border border-[#2A2F36] rounded-md shadow-lg z-10">
           <SearchResults
             results={results}
             onSelectResult={handleSelectResult}
@@ -116,10 +131,13 @@ export default function GlobalSearch() {
       )}
       
       {!showResults && history.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-secondary border border-border-color rounded-md shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto bg-[#1A1E23] border border-[#2A2F36] rounded-md shadow-lg z-10">
           <SearchHistory
             history={history}
-            onSelectQuery={handleSearch}
+            onSelectQuery={(query) => {
+              handleSearch(query);
+              // The search will show results, so we don't need to manually close here
+            }}
             onClearHistory={handleClearHistory}
           />
         </div>

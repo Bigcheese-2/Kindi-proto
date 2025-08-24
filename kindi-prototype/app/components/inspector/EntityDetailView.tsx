@@ -69,82 +69,167 @@ export default function EntityDetailView({ entityId }: EntityDetailViewProps) {
   
   const relatedEntities = findRelatedEntities();
 
-  return (
-    <div className="p-4 space-y-6">
-      <div className="flex items-center">
-        <div className="w-12 h-12 bg-accent rounded-md flex items-center justify-center mr-3">
+  // Get appropriate icon based on entity type
+  const getEntityIcon = (type: EntityType) => {
+    switch(type) {
+      case EntityType.PERSON:
+        return (
           <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
+        );
+      case EntityType.ORGANIZATION:
+        return (
+          <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        );
+      default:
+        return (
+          <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        );
+    }
+  };
+
+  // Get badge color based on risk level
+  const getRiskBadgeColor = (risk: number) => {
+    if (risk >= 0.7) return 'bg-red-500';
+    if (risk >= 0.4) return 'bg-orange-500';
+    return 'bg-green-500';
+  };
+
+  // Format risk level text
+  const getRiskLevelText = (risk: number) => {
+    if (risk >= 0.7) return 'High';
+    if (risk >= 0.4) return 'Medium';
+    return 'Low';
+  };
+
+  return (
+    <div className="p-5 space-y-6 w-full max-w-full">
+      {/* Header Section with Avatar and Basic Info */}
+      <div className="flex items-center max-w-full bg-secondary rounded-xl p-4">
+        <div className="w-14 h-14 bg-accent rounded-xl flex items-center justify-center mr-4 flex-shrink-0 shadow-lg">
+          {getEntityIcon(displayEntity.type)}
         </div>
-        <div>
-          <h3 className="text-neutral-light font-medium text-lg">{displayEntity.name}</h3>
-          <div className="text-sm text-neutral-medium">Person of Interest</div>
+        <div className="min-w-0">
+          <div className="flex items-center mb-1">
+            <h3 className="text-neutral-light font-semibold text-xl truncate">{displayEntity.name}</h3>
+            {displayEntity.risk !== undefined && (
+              <span className={`ml-2 px-2 py-0.5 text-xs text-white font-medium rounded-full ${getRiskBadgeColor(displayEntity.risk)}`}>
+                {getRiskLevelText(displayEntity.risk)}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center">
+            <div className="text-sm text-neutral-medium">{getEntityTypeLabel(displayEntity.type)}</div>
+            <span className="mx-2 text-neutral-medium">•</span>
+            <div className="text-sm text-neutral-medium">ID: {displayEntity.id}</div>
+          </div>
         </div>
       </div>
       
+      {/* Risk Meter */}
       {displayEntity.risk !== undefined && (
-        <div>
-          <h4 className="text-xs font-medium text-neutral-light mb-2">RISK LEVEL</h4>
-          <div className="w-full h-2 bg-secondary rounded-full">
+        <div className="max-w-full bg-secondary rounded-xl p-4">
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="text-sm font-medium text-neutral-light">RISK ASSESSMENT</h4>
+            <span className={`text-xs ${displayEntity.risk >= 0.7 ? 'text-red-500' : displayEntity.risk >= 0.4 ? 'text-orange-500' : 'text-green-500'} font-medium`}>
+              {Math.round(displayEntity.risk * 100)}%
+            </span>
+          </div>
+          <div className="w-full h-2 bg-[#374151] rounded-full overflow-hidden">
             <div 
-              className="h-full bg-orange-500 rounded-full" 
+              className={`h-full rounded-full ${getRiskBadgeColor(displayEntity.risk)}`}
               style={{ width: `${displayEntity.risk * 100}%` }}
             ></div>
-          </div>
-          <div className="flex justify-end mt-1">
-            <span className="text-xs text-orange-500 font-medium">
-              High
-            </span>
           </div>
         </div>
       )}
       
-      <div>
-        <h4 className="text-xs font-medium text-neutral-light mb-2">LAST ACTIVITY</h4>
-        <div className="text-xs text-neutral-medium">2 hours ago</div>
+      {/* Attributes Section */}
+      <div className="max-w-full bg-secondary rounded-xl p-4">
+        <h4 className="text-sm font-medium text-neutral-light mb-3">ATTRIBUTES</h4>
+        <div className="grid grid-cols-2 gap-4">
+          {displayEntity.attributes && Object.entries(displayEntity.attributes).map(([key, value]) => (
+            <div key={key} className="bg-[#374151] rounded-lg p-3">
+              <div className="text-xs text-neutral-medium uppercase">{key}</div>
+              <div className="text-neutral-light font-medium mt-1">{value as string}</div>
+            </div>
+          ))}
+        </div>
       </div>
       
-      <div>
-        <h4 className="text-xs font-medium text-neutral-light mb-2">CONNECTIONS</h4>
-        <div className="text-neutral-light text-base font-medium">14 direct, 47 indirect</div>
+      {/* Activity & Connections */}
+      <div className="grid grid-cols-2 gap-4 max-w-full">
+        <div className="bg-secondary rounded-xl p-4">
+          <h4 className="text-sm font-medium text-neutral-light mb-2">LAST ACTIVITY</h4>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-accent rounded-full mr-2"></div>
+            <div className="text-neutral-light">2 hours ago</div>
+          </div>
+        </div>
+        
+        <div className="bg-secondary rounded-xl p-4">
+          <h4 className="text-sm font-medium text-neutral-light mb-2">CONNECTIONS</h4>
+          <div className="text-neutral-light">
+            <span className="font-semibold">14</span> direct, 
+            <span className="font-semibold ml-1">47</span> indirect
+          </div>
+        </div>
       </div>
       
-      <div>
-        <h4 className="text-xs font-medium text-neutral-light mb-2">LOCATIONS</h4>
+      {/* Locations */}
+      <div className="max-w-full bg-secondary rounded-xl p-4">
+        <h4 className="text-sm font-medium text-neutral-light mb-3">LOCATIONS</h4>
         <div className="flex flex-wrap gap-2">
-          <div className="bg-secondary rounded-md px-4 py-2 text-neutral-light text-sm">
+          <div className="bg-[#374151] rounded-lg px-3 py-1.5 text-neutral-light text-sm flex items-center">
+            <svg className="h-4 w-4 mr-1.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
             Moscow
           </div>
-          <div className="bg-secondary rounded-md px-4 py-2 text-neutral-light text-sm">
+          <div className="bg-[#374151] rounded-lg px-3 py-1.5 text-neutral-light text-sm flex items-center">
+            <svg className="h-4 w-4 mr-1.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
             Berlin
           </div>
-          <div className="bg-secondary rounded-md px-4 py-2 text-neutral-light text-sm">
+          <div className="bg-[#374151] rounded-lg px-3 py-1.5 text-neutral-light text-sm flex items-center">
+            <svg className="h-4 w-4 mr-1.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
             London
           </div>
         </div>
       </div>
       
-      <div>
-        <h4 className="text-xl font-medium text-neutral-light mb-4">Recent Events</h4>
+      {/* Recent Events Timeline */}
+      <div className="max-w-full bg-secondary rounded-xl p-4">
+        <h4 className="text-sm font-medium text-neutral-light mb-4">RECENT EVENTS</h4>
         
-        <div className="space-y-8">
-          <div className="relative pl-6">
-            <div className="absolute left-0 top-1.5 w-3 h-3 bg-red-500 rounded-full"></div>
-            <div className="text-base text-neutral-light font-medium">Financial transaction detected</div>
-            <div className="text-sm text-neutral-medium mt-1">2 hours ago</div>
+        <div className="space-y-4">
+          <div className="relative pl-6 pb-4 border-l border-[#374151]">
+            <div className="absolute left-0 top-0 -translate-x-1/2 w-3 h-3 bg-red-500 rounded-full border-2 border-secondary"></div>
+            <div className="text-sm text-neutral-light font-medium">Financial transaction detected</div>
+            <div className="text-xs text-neutral-medium mt-1">2 hours ago</div>
+          </div>
+          
+          <div className="relative pl-6 pb-4 border-l border-[#374151]">
+            <div className="absolute left-0 top-0 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-full border-2 border-secondary"></div>
+            <div className="text-sm text-neutral-light font-medium">Communication intercept</div>
+            <div className="text-xs text-neutral-medium mt-1">6 hours ago</div>
           </div>
           
           <div className="relative pl-6">
-            <div className="absolute left-0 top-1.5 w-3 h-3 bg-blue-500 rounded-full"></div>
-            <div className="text-base text-neutral-light font-medium">Communication intercept</div>
-            <div className="text-sm text-neutral-medium mt-1">6 hours ago</div>
-          </div>
-          
-          <div className="relative pl-6">
-            <div className="absolute left-0 top-1.5 w-3 h-3 bg-green-500 rounded-full"></div>
-            <div className="text-base text-neutral-light font-medium">Location update</div>
-            <div className="text-sm text-neutral-medium mt-1">Yesterday, 18:30</div>
+            <div className="absolute left-0 top-0 -translate-x-1/2 w-3 h-3 bg-green-500 rounded-full border-2 border-secondary"></div>
+            <div className="text-sm text-neutral-light font-medium">Location update</div>
+            <div className="text-xs text-neutral-medium mt-1">Yesterday, 18:30</div>
           </div>
         </div>
       </div>

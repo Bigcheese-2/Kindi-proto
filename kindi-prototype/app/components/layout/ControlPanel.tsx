@@ -40,7 +40,7 @@ export default function ControlPanel() {
   });
 
   return (
-    <div className="control-panel h-full flex flex-col overflow-hidden border-2 border-red-500">
+    <div className="control-panel h-full flex flex-col overflow-hidden">
       <div className="flex justify-between items-center p-3 border-b border-secondary">
         <div className="flex space-x-1">
           <button
@@ -80,25 +80,36 @@ export default function ControlPanel() {
       </div>
       
       {/* Data Source Indicator */}
-      <div className="px-3 py-2 border-b border-secondary bg-primary">
+      <div className="px-4 py-3 border-b border-secondary bg-[#1A1E23] shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <div className="flex items-center">
-              <svg className="w-4 h-4 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-8 h-8 rounded-lg bg-[#2A2F36] flex items-center justify-center mr-3">
+              <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9h6m-6 4h6" />
               </svg>
-              <span className="text-xs font-medium text-neutral-medium uppercase tracking-wide">Data Source</span>
+            </div>
+            <div>
+              <span className="text-xs font-medium text-neutral-medium uppercase tracking-wide block mb-1">Data Source</span>
+              {currentDataset ? (
+                <span className="text-sm font-medium text-neutral-light">
+                  {currentDataset.name}
+                </span>
+              ) : (
+                <span className="text-sm text-neutral-medium">
+                  {isLoading ? 'Loading dataset...' : 'No dataset loaded'}
+                </span>
+              )}
             </div>
           </div>
+          
           <div className="flex items-center">
             {isLoading && (
               <div className="mr-2">
-                <div className="w-3 h-3 border border-accent border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
             {error && (
-              <div className="mr-2" title={error.message}>
+              <div className="mr-2 p-1 bg-red-500 bg-opacity-10 rounded-full" title={error.message}>
                 <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
@@ -107,29 +118,29 @@ export default function ControlPanel() {
           </div>
         </div>
         
-        <div className="mt-1">
-          {currentDataset ? (
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-neutral-light">
-                {currentDataset.name}
-              </span>
-              <div className="flex items-center space-x-2 text-xs text-neutral-medium">
-                <span>{currentDataset.entities?.length || 0} entities</span>
-                <span>•</span>
-                <span>{currentDataset.events?.length || 0} events</span>
-                <span>•</span>
-                <span>{currentDataset.locations?.length || 0} locations</span>
+        {currentDataset && (
+          <div className="flex items-center mt-2 p-2 rounded-lg bg-[#2A2F36] bg-opacity-50">
+            <div className="flex items-center space-x-3 text-xs text-neutral-medium w-full justify-around">
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-semibold text-neutral-light">{currentDataset.entities?.length || 0}</span>
+                <span>entities</span>
+              </div>
+              <div className="h-8 border-r border-secondary"></div>
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-semibold text-neutral-light">{currentDataset.events?.length || 0}</span>
+                <span>events</span>
+              </div>
+              <div className="h-8 border-r border-secondary"></div>
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-semibold text-neutral-light">{currentDataset.locations?.length || 0}</span>
+                <span>locations</span>
               </div>
             </div>
-          ) : (
-            <div className="text-sm text-neutral-medium">
-              {isLoading ? 'Loading dataset...' : 'No dataset loaded'}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
         
         {error && (
-          <div className="mt-1 text-xs text-red-400">
+          <div className="mt-2 p-2 rounded bg-red-500 bg-opacity-10 text-xs text-red-400">
             {error.message}
           </div>
         )}

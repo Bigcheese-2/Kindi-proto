@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { useData } from '@/app/contexts/DataContext';
 import { GeoLocation, LocationType, Event } from '@/app/models/data-types';
 import { useSelection } from '@/app/contexts/SelectionContext';

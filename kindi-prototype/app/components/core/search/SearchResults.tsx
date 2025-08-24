@@ -38,11 +38,11 @@ function SearchResultItem({ result, onSelect }: SearchResultItemProps) {
   return (
     <li>
       <button
-        className="w-full text-left px-4 py-2 hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
+        className="w-full text-left px-4 py-2 hover:bg-[#2A2F36] focus:outline-none focus:bg-[#2A2F36]"
         onClick={() => onSelect(result)}
       >
         <div className="flex items-center">
-          <div className="flex-shrink-0 w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center mr-3">
+          <div className="flex-shrink-0 w-8 h-8 bg-[#2A2F36] rounded-full flex items-center justify-center mr-3">
             {getIcon()}
           </div>
           <div>
@@ -89,7 +89,7 @@ export default function SearchResults({
     <div className="search-results">
       {results.entities.length > 0 && (
         <div className="result-category">
-          <h3 className="text-xs font-medium text-neutral-medium uppercase px-4 py-2 border-b border-gray-700">
+          <h3 className="text-xs font-medium text-neutral-medium uppercase px-4 py-2 border-b border-[#2A2F36]">
             Entities ({results.entities.length})
           </h3>
           <ul className="divide-y divide-gray-800">
@@ -106,7 +106,7 @@ export default function SearchResults({
       
       {results.events.length > 0 && (
         <div className="result-category mt-2">
-          <h3 className="text-xs font-medium text-neutral-medium uppercase px-4 py-2 border-b border-gray-700">
+          <h3 className="text-xs font-medium text-neutral-medium uppercase px-4 py-2 border-b border-[#2A2F36]">
             Events ({results.events.length})
           </h3>
           <ul className="divide-y divide-gray-800">
@@ -123,7 +123,7 @@ export default function SearchResults({
       
       {results.locations.length > 0 && (
         <div className="result-category mt-2">
-          <h3 className="text-xs font-medium text-neutral-medium uppercase px-4 py-2 border-b border-gray-700">
+          <h3 className="text-xs font-medium text-neutral-medium uppercase px-4 py-2 border-b border-[#2A2F36]">
             Locations ({results.locations.length})
           </h3>
           <ul className="divide-y divide-gray-800">
